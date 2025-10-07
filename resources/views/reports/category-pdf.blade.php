@@ -69,77 +69,72 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
-            font-size: 9px;
-            table-layout: auto;
+            font-size: 8px;
+            table-layout: fixed;
         }
         
         th, td {
             border: 1px solid #333;
-            padding: 4px 6px;
+            padding: 3px 4px;
             text-align: left;
             vertical-align: top;
-            white-space: nowrap;
-            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         
-        /* Column-specific styles */
+        /* Column-specific styles with fixed widths */
         th:nth-child(1), td:nth-child(1) { /* No */
+            width: 3%;
             text-align: center;
-            min-width: 25px;
         }
         
         th:nth-child(2), td:nth-child(2) { /* Subject/Address */
-            white-space: normal;
-            word-wrap: break-word;
-            min-width: 100px;
+            width: 12%;
         }
         
         th:nth-child(3), td:nth-child(3) { /* Description */
-            white-space: normal;
-            word-wrap: break-word;
-            min-width: 100px;
+            width: 15%;
         }
         
         th:nth-child(4), td:nth-child(4) { /* Unit Qty */
+            width: 4%;
             text-align: center;
-            min-width: 40px;
         }
         
         th:nth-child(5), td:nth-child(5) { /* Category */
-            min-width: 70px;
+            width: 8%;
         }
         
         th:nth-child(6), td:nth-child(6) { /* Task */
-            min-width: 80px;
+            width: 12%;
         }
         
         th:nth-child(7), td:nth-child(7) { /* Builder */
-            min-width: 80px;
+            width: 12%;
         }
         
         th:nth-child(8), td:nth-child(8) { /* Dwelling */
-            min-width: 80px;
+            width: 14%;
         }
         
         th:nth-child(9), td:nth-child(9) { /* Status */
+            width: 7%;
             text-align: center;
-            min-width: 50px;
         }
         
         th:nth-child(10), td:nth-child(10) { /* Duration Minutes */
+            width: 5%;
             text-align: center;
-            min-width: 50px;
         }
         
         th:nth-child(11), td:nth-child(11) { /* Additional Notes */
-            white-space: normal;
-            word-wrap: break-word;
-            min-width: 80px;
+            width: 5%;
         }
         
         th:nth-child(12), td:nth-child(12) { /* Work Status */
+            width: 5%;
             text-align: center;
-            min-width: 60px;
         }
         
         th {
