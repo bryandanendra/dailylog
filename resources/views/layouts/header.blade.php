@@ -37,7 +37,7 @@
             </li>
             <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
-                    <img src="/images/none.png" alt="Profile" class="rounded-circle">
+                    <img src="/images/user.png" alt="Profile" class="rounded-circle">
                     <span class="d-none d-md-block dropdown-toggle ps-2 text-capitalize">{{ Auth::user() ? Auth::user()->name : 'Guest' }}</span>
                 </a>
                 
