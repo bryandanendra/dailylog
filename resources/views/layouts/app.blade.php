@@ -172,6 +172,12 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1050;
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+        }
+        .dropdown-menu.notifications:not(.show) {
+            display: none !important;
         }
         .dropdown-menu.notifications .dropdown-header {
             padding: 12px 16px;
@@ -203,22 +209,36 @@
         /* Profile Dropdown */
         .dropdown-menu.profile {
             min-width: 280px;
+            max-width: 320px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1050;
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+        }
+        .dropdown-menu.profile:not(.show) {
+            display: none !important;
         }
         .dropdown-menu.profile .dropdown-header {
             padding: 16px;
             border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
         }
         .dropdown-menu.profile .dropdown-header h6 {
             margin: 0 0 8px 0;
             font-size: 1rem;
             font-weight: 600;
+            color: #333;
         }
         .dropdown-menu.profile .dropdown-header div {
             font-size: 0.85rem;
             line-height: 1.6;
+            color: #666;
+        }
+        .dropdown-menu.profile .dropdown-header div span {
+            display: block;
+            margin-bottom: 2px;
         }
         .content-area {
             padding: 20px;

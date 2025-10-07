@@ -41,7 +41,7 @@
                     <span class="d-none d-md-block dropdown-toggle ps-2 text-capitalize">{{ Auth::user() ? Auth::user()->name : 'Guest' }}</span>
                 </a>
                 
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" onclick="event.stopPropagation();">
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                     <li class="dropdown-header">
                         <h6 class="text-capitalize">{{ Auth::user() ? Auth::user()->name : 'Guest' }}</h6>
                         <div class="text-start">
