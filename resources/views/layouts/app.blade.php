@@ -107,24 +107,116 @@
             display: flex;
             align-items: center;
         }
+        .header-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-nav .nav-item {
+            position: relative;
+        }
         .nav-icon {
             position: relative;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+        }
+        .nav-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
         }
         .badge-number {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            font-size: 0.7rem;
+            top: 2px;
+            right: 4px;
+            font-size: 0.65rem;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 5px;
+            border-radius: 10px;
         }
         .nav-profile {
             color: white;
             text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .nav-profile:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
         }
         .nav-profile img {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        /* Notification Dropdown */
+        .dropdown-menu.notifications {
+            min-width: 320px;
+            max-width: 400px;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .dropdown-menu.notifications .dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+        }
+        .dropdown-menu.notifications #notif-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .dropdown-menu.notifications .notification-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+        }
+        .dropdown-menu.notifications .notification-item:hover {
+            background-color: #f5f5f5;
+        }
+        .dropdown-menu.notifications .notification-item h6 {
+            margin: 0 0 4px 0;
+            font-size: 0.9rem;
+        }
+        .dropdown-menu.notifications .notification-item p {
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        /* Profile Dropdown */
+        .dropdown-menu.profile {
+            min-width: 280px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .dropdown-menu.profile .dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .dropdown-menu.profile .dropdown-header h6 {
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .dropdown-menu.profile .dropdown-header div {
+            font-size: 0.85rem;
+            line-height: 1.6;
         }
         .content-area {
             padding: 20px;

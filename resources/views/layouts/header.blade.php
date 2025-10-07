@@ -18,12 +18,12 @@
         </form>
     </div>
     <nav class="header-nav ms-auto">
-        <ul class="d-flex align-items-center">
+        <ul class="d-flex align-items-center" style="gap: 4px;">
             <!-- Notification -->
             <li id="notif" class="nav-item dropdown">
-                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" style="position: relative;">
                     <i class="bi bi-bell"></i>
-                    <span class="badge bg-primary badge-number" id="notif-count" style="display: none;">0</span>
+                    <span class="badge bg-danger badge-number" id="notif-count" style="display: none;">0</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
                     <li class="dropdown-header fw-bold text-primary" id="notif-header">You have 0 new notifications</li>
