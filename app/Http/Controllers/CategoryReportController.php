@@ -44,21 +44,25 @@ class CategoryReportController extends Controller
             $currentPositionLevel = config('approval.position_levels')[$currentEmployee->position->title] ?? 0;
             
             $employees = $employees->where(function($query) use ($currentEmployee, $currentPositionLevel) {
-                // Same division employees
-                $query->where('division_id', $currentEmployee->division_id)
-                    ->where(function($q) use ($currentEmployee, $currentPositionLevel) {
-                        // Subordinates (employees whose superior is current user)
-                        $q->where('superior_id', $currentEmployee->id)
-                        // OR employees with lower position level in same division
-                        ->orWhereHas('position', function($pq) use ($currentPositionLevel) {
-                            $positionTitles = collect(config('approval.position_levels'))
-                                ->filter(function($level) use ($currentPositionLevel) {
-                                    return $level < $currentPositionLevel;
-                                })
-                                ->keys()
-                                ->toArray();
-                            $pq->whereIn('title', $positionTitles);
-                        });
+                // Include current user's own logs
+                $query->where('id', $currentEmployee->id)
+                    // OR same division employees
+                    ->orWhere(function($q) use ($currentEmployee, $currentPositionLevel) {
+                        $q->where('division_id', $currentEmployee->division_id)
+                            ->where(function($q2) use ($currentEmployee, $currentPositionLevel) {
+                                // Subordinates (employees whose superior is current user)
+                                $q2->where('superior_id', $currentEmployee->id)
+                                // OR employees with lower position level in same division
+                                ->orWhereHas('position', function($pq) use ($currentPositionLevel) {
+                                    $positionTitles = collect(config('approval.position_levels'))
+                                        ->filter(function($level) use ($currentPositionLevel) {
+                                            return $level < $currentPositionLevel;
+                                        })
+                                        ->keys()
+                                        ->toArray();
+                                    $pq->whereIn('title', $positionTitles);
+                                });
+                            });
                     });
             });
         } else {
@@ -187,21 +191,25 @@ class CategoryReportController extends Controller
             $currentPositionLevel = config('approval.position_levels')[$currentEmployee->position->title] ?? 0;
             
             $employees = $employees->where(function($query) use ($currentEmployee, $currentPositionLevel) {
-                // Same division employees
-                $query->where('division_id', $currentEmployee->division_id)
-                    ->where(function($q) use ($currentEmployee, $currentPositionLevel) {
-                        // Subordinates (employees whose superior is current user)
-                        $q->where('superior_id', $currentEmployee->id)
-                        // OR employees with lower position level in same division
-                        ->orWhereHas('position', function($pq) use ($currentPositionLevel) {
-                            $positionTitles = collect(config('approval.position_levels'))
-                                ->filter(function($level) use ($currentPositionLevel) {
-                                    return $level < $currentPositionLevel;
-                                })
-                                ->keys()
-                                ->toArray();
-                            $pq->whereIn('title', $positionTitles);
-                        });
+                // Include current user's own logs
+                $query->where('id', $currentEmployee->id)
+                    // OR same division employees
+                    ->orWhere(function($q) use ($currentEmployee, $currentPositionLevel) {
+                        $q->where('division_id', $currentEmployee->division_id)
+                            ->where(function($q2) use ($currentEmployee, $currentPositionLevel) {
+                                // Subordinates (employees whose superior is current user)
+                                $q2->where('superior_id', $currentEmployee->id)
+                                // OR employees with lower position level in same division
+                                ->orWhereHas('position', function($pq) use ($currentPositionLevel) {
+                                    $positionTitles = collect(config('approval.position_levels'))
+                                        ->filter(function($level) use ($currentPositionLevel) {
+                                            return $level < $currentPositionLevel;
+                                        })
+                                        ->keys()
+                                        ->toArray();
+                                    $pq->whereIn('title', $positionTitles);
+                                });
+                            });
                     });
             });
         } else {
