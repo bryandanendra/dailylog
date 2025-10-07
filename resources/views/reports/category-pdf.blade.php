@@ -70,13 +70,76 @@
             border-collapse: collapse;
             margin-bottom: 15px;
             font-size: 9px;
+            table-layout: auto;
         }
         
         th, td {
             border: 1px solid #333;
-            padding: 4px;
+            padding: 4px 6px;
             text-align: left;
             vertical-align: top;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        /* Column-specific styles */
+        th:nth-child(1), td:nth-child(1) { /* No */
+            text-align: center;
+            min-width: 25px;
+        }
+        
+        th:nth-child(2), td:nth-child(2) { /* Subject/Address */
+            white-space: normal;
+            word-wrap: break-word;
+            min-width: 100px;
+        }
+        
+        th:nth-child(3), td:nth-child(3) { /* Description */
+            white-space: normal;
+            word-wrap: break-word;
+            min-width: 100px;
+        }
+        
+        th:nth-child(4), td:nth-child(4) { /* Unit Qty */
+            text-align: center;
+            min-width: 40px;
+        }
+        
+        th:nth-child(5), td:nth-child(5) { /* Category */
+            min-width: 70px;
+        }
+        
+        th:nth-child(6), td:nth-child(6) { /* Task */
+            min-width: 80px;
+        }
+        
+        th:nth-child(7), td:nth-child(7) { /* Builder */
+            min-width: 80px;
+        }
+        
+        th:nth-child(8), td:nth-child(8) { /* Dwelling */
+            min-width: 80px;
+        }
+        
+        th:nth-child(9), td:nth-child(9) { /* Status */
+            text-align: center;
+            min-width: 50px;
+        }
+        
+        th:nth-child(10), td:nth-child(10) { /* Duration Minutes */
+            text-align: center;
+            min-width: 50px;
+        }
+        
+        th:nth-child(11), td:nth-child(11) { /* Additional Notes */
+            white-space: normal;
+            word-wrap: break-word;
+            min-width: 80px;
+        }
+        
+        th:nth-child(12), td:nth-child(12) { /* Work Status */
+            text-align: center;
+            min-width: 60px;
         }
         
         th {
@@ -155,18 +218,18 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th style="width: 5%;">No</th>
-                                        <th style="width: 20%;">Subject / Address</th>
-                                        <th style="width: 20%;">Description</th>
-                                        <th style="width: 8%;">Unit Qty</th>
-                                        <th style="width: 12%;">Category</th>
-                                        <th style="width: 12%;">Task</th>
-                                        <th style="width: 12%;">Builder</th>
-                                        <th style="width: 12%;">Dwelling</th>
-                                        <th style="width: 10%;">Status</th>
-                                        <th style="width: 8%;">Duration Minutes</th>
-                                        <th style="width: 20%;">Additional Notes</th>
-                                        <th style="width: 10%;">Work Status</th>
+                                        <th>No</th>
+                                        <th>Subject / Address</th>
+                                        <th>Description</th>
+                                        <th>Unit Qty</th>
+                                        <th>Category</th>
+                                        <th>Task</th>
+                                        <th>Builder</th>
+                                        <th>Dwelling</th>
+                                        <th>Status</th>
+                                        <th>Duration Minutes</th>
+                                        <th>Additional Notes</th>
+                                        <th>Work Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
