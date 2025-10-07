@@ -173,8 +173,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1050;
             position: absolute !important;
-            top: 100% !important;
+            top: calc(100% + 4px) !important;
             right: 0 !important;
+            margin-top: 0 !important;
         }
         .dropdown-menu.notifications:not(.show) {
             display: none !important;
@@ -214,8 +215,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1050;
             position: absolute !important;
-            top: 100% !important;
+            top: calc(100% + 4px) !important;
             right: 0 !important;
+            margin-top: 0 !important;
         }
         .dropdown-menu.profile:not(.show) {
             display: none !important;
