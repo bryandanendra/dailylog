@@ -70,71 +70,78 @@
             border-collapse: collapse;
             margin-bottom: 15px;
             font-size: 8px;
-            table-layout: fixed;
+            table-layout: auto;
         }
         
         th, td {
             border: 1px solid #333;
-            padding: 3px 4px;
+            padding: 3px 5px;
             text-align: left;
             vertical-align: top;
             word-wrap: break-word;
             word-break: break-word;
-            overflow-wrap: break-word;
+            hyphens: auto;
         }
         
-        /* Column-specific styles with fixed widths */
+        /* Compact columns - no wrapping */
         th:nth-child(1), td:nth-child(1) { /* No */
-            width: 3%;
             text-align: center;
-        }
-        
-        th:nth-child(2), td:nth-child(2) { /* Subject/Address */
-            width: 12%;
-        }
-        
-        th:nth-child(3), td:nth-child(3) { /* Description */
-            width: 15%;
+            white-space: nowrap;
+            width: 1%;
         }
         
         th:nth-child(4), td:nth-child(4) { /* Unit Qty */
-            width: 4%;
             text-align: center;
+            white-space: nowrap;
+            width: 1%;
         }
         
         th:nth-child(5), td:nth-child(5) { /* Category */
-            width: 8%;
-        }
-        
-        th:nth-child(6), td:nth-child(6) { /* Task */
-            width: 12%;
-        }
-        
-        th:nth-child(7), td:nth-child(7) { /* Builder */
-            width: 12%;
-        }
-        
-        th:nth-child(8), td:nth-child(8) { /* Dwelling */
-            width: 14%;
+            white-space: nowrap;
+            width: 1%;
         }
         
         th:nth-child(9), td:nth-child(9) { /* Status */
-            width: 7%;
             text-align: center;
+            white-space: nowrap;
+            width: 1%;
         }
         
         th:nth-child(10), td:nth-child(10) { /* Duration Minutes */
-            width: 5%;
             text-align: center;
-        }
-        
-        th:nth-child(11), td:nth-child(11) { /* Additional Notes */
-            width: 5%;
+            white-space: nowrap;
+            width: 1%;
         }
         
         th:nth-child(12), td:nth-child(12) { /* Work Status */
-            width: 5%;
             text-align: center;
+            white-space: nowrap;
+            width: 1%;
+        }
+        
+        /* Flexible columns - allow wrapping */
+        th:nth-child(2), td:nth-child(2) { /* Subject/Address */
+            max-width: 120px;
+        }
+        
+        th:nth-child(3), td:nth-child(3) { /* Description */
+            max-width: 150px;
+        }
+        
+        th:nth-child(6), td:nth-child(6) { /* Task */
+            max-width: 120px;
+        }
+        
+        th:nth-child(7), td:nth-child(7) { /* Builder */
+            max-width: 130px;
+        }
+        
+        th:nth-child(8), td:nth-child(8) { /* Dwelling */
+            max-width: 150px;
+        }
+        
+        th:nth-child(11), td:nth-child(11) { /* Additional Notes */
+            max-width: 100px;
         }
         
         th {
