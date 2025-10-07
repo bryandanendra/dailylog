@@ -171,6 +171,7 @@
             padding: 0;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1050;
         }
         .dropdown-menu.notifications .dropdown-header {
             padding: 12px 16px;
@@ -204,6 +205,7 @@
             min-width: 280px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1050;
         }
         .dropdown-menu.profile .dropdown-header {
             padding: 16px;

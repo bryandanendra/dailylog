@@ -243,5 +243,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reload notifications every 30 seconds
     setInterval(loadNotifications, 30000);
+    
+    // Auto-close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        // Check if click is outside dropdown
+        const notifDropdown = document.querySelector('#notif .dropdown-menu');
+        const notifButton = document.querySelector('#notif .nav-link');
+        const profileDropdown = document.querySelector('.nav-item.dropdown.pe-3 .dropdown-menu');
+        const profileButton = document.querySelector('.nav-item.dropdown.pe-3 .nav-link');
+        
+        // Close notification dropdown if click is outside
+        if (notifDropdown && !notifDropdown.contains(e.target) && !notifButton.contains(e.target)) {
+            const bsDropdown = bootstrap.Dropdown.getInstance(notifButton);
+            if (bsDropdown && notifDropdown.classList.contains('show')) {
+                bsDropdown.hide();
+            }
+        }
+        
+        // Close profile dropdown if click is outside
+        if (profileDropdown && !profileDropdown.contains(e.target) && !profileButton.contains(e.target)) {
+            const bsDropdown = bootstrap.Dropdown.getInstance(profileButton);
+            if (bsDropdown && profileDropdown.classList.contains('show')) {
+                bsDropdown.hide();
+            }
+        }
+    });
+    
+    // Close notification dropdown when profile is opened
+    document.querySelector('.nav-item.dropdown.pe-3 .nav-link')?.addEventListener('click', function() {
+        const notifButton = document.querySelector('#notif .nav-link');
+        const bsDropdown = bootstrap.Dropdown.getInstance(notifButton);
+        if (bsDropdown) {
+            bsDropdown.hide();
+        }
+    });
+    
+    // Close profile dropdown when notification is opened
+    document.querySelector('#notif .nav-link')?.addEventListener('click', function() {
+        const profileButton = document.querySelector('.nav-item.dropdown.pe-3 .nav-link');
+        const bsDropdown = bootstrap.Dropdown.getInstance(profileButton);
+        if (bsDropdown) {
+            bsDropdown.hide();
+        }
+    });
 });
 </script>
