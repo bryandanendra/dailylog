@@ -21,17 +21,19 @@
         <ul class="d-flex align-items-center" style="gap: 4px;">
             <!-- Notification -->
             <li id="notif" class="nav-item dropdown">
-                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" style="position: relative;">
+                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-bell"></i>
                     <span class="badge bg-danger badge-number" id="notif-count" style="display: none;">0</span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
-                    <li class="dropdown-header fw-bold text-primary" id="notif-header">You have 0 new notifications</li>
-                    <li class="text-center" style="border-bottom: 2px solid blue;"><a href="#" id="mark-all-read" class="text-secondary" style="font-size: 0.9em;">Mark All as Read</a></li>
-                    <ul class="m-0 p-0 overflow-auto" id="notif-list" style="max-height: 480px">
+                <div class="dropdown-menu dropdown-menu-end notifications" style="padding: 0;">
+                    <div class="dropdown-header fw-bold text-primary" id="notif-header">You have 0 new notifications</div>
+                    <div class="text-center py-2" style="border-bottom: 1px solid #dee2e6;">
+                        <a href="#" id="mark-all-read" class="text-primary" style="font-size: 0.9em; text-decoration: none;">Mark All as Read</a>
+                    </div>
+                    <div class="overflow-auto" id="notif-list" style="max-height: 400px;">
                         <!-- Notifications will be loaded here dynamically -->
-                    </ul>
-                </ul>
+                    </div>
+                </div>
             </li>
             <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
@@ -166,35 +168,49 @@ function loadNotifications() {
             
             if (data.notifications.length === 0) {
                 notifList.innerHTML = `
-                    <li class="text-center py-3 text-muted">
+                    <div class="text-center py-3 text-muted">
                         <i class="bi bi-inbox"></i> No notifications
-                    </li>
+                    </div>
                 `;
                 return;
             }
             
             data.notifications.forEach(notif => {
-                const li = document.createElement('li');
-                li.className = 'notification-item';
-                li.id = `notif-${notif.id}`;
-                li.style.cssText = `cursor: pointer; border-bottom: 1px solid #ddd; padding: 12px; ${notif.read_status ? 'background-color: rgba(0,0,0, 0.05);' : 'background-color: #e3f2fd;'}`;
+                const div = document.createElement('div');
+                div.className = 'notification-item';
+                div.id = `notif-${notif.id}`;
+                div.style.cssText = `cursor: pointer; border-bottom: 1px solid #ddd; padding: 12px 16px; transition: background-color 0.2s; ${notif.read_status ? 'background-color: rgba(0,0,0, 0.05);' : 'background-color: #e3f2fd;'}`;
                 
-                li.innerHTML = `
-                    <div>
-                        <h6 class="mb-1 fw-bold text-primary">${notif.title}</h6>
-                        <p class="mb-1 text-dark small">${notif.message}</p>
-                        <p class="mb-0 text-secondary text-end" style="font-size: 0.75rem;">${notif.created_at}</p>
-                    </div>
+                div.innerHTML = `
+                    <h6 class="mb-1 fw-bold text-primary" style="font-size: 0.9rem;">${notif.title}</h6>
+                    <p class="mb-1 text-dark small">${notif.message}</p>
+                    <p class="mb-0 text-secondary text-end" style="font-size: 0.75rem;">${notif.created_at}</p>
                 `;
                 
+                // Hover effect
+                div.addEventListener('mouseenter', function() {
+                    if (!notif.read_status) {
+                        this.style.backgroundColor = '#bbdefb';
+                    } else {
+                        this.style.backgroundColor = '#f5f5f5';
+                    }
+                });
+                div.addEventListener('mouseleave', function() {
+                    if (!notif.read_status) {
+                        this.style.backgroundColor = '#e3f2fd';
+                    } else {
+                        this.style.backgroundColor = 'rgba(0,0,0, 0.05)';
+                    }
+                });
+                
                 // Mark as read on click
-                li.addEventListener('click', function() {
+                div.addEventListener('click', function() {
                     if (!notif.read_status) {
                         markAsRead(notif.id);
                     }
                 });
                 
-                notifList.appendChild(li);
+                notifList.appendChild(div);
             });
         })
         .catch(error => console.error('Error loading notifications:', error));
