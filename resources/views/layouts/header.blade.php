@@ -21,11 +21,11 @@
         <ul class="d-flex align-items-center" style="gap: 4px;">
             <!-- Notification -->
             <li id="notif" class="nav-item dropdown">
-                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i class="bi bi-bell"></i>
                     <span class="badge bg-danger badge-number" id="notif-count" style="display: none;">0</span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-end notifications" style="padding: 0;">
+                <div class="dropdown-menu dropdown-menu-end notifications" style="padding: 0;" onclick="event.stopPropagation();">
                     <div class="dropdown-header fw-bold text-primary" id="notif-header">You have 0 new notifications</div>
                     <div class="text-center py-2" style="border-bottom: 1px solid #dee2e6;">
                         <a href="#" id="mark-all-read" class="text-primary" style="font-size: 0.9em; text-decoration: none;">Mark All as Read</a>
@@ -36,12 +36,12 @@
                 </div>
             </li>
             <li class="nav-item dropdown pe-3">
-                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
                     <img src="/images/none.png" alt="Profile" class="rounded-circle">
                     <span class="d-none d-md-block dropdown-toggle ps-2 text-capitalize">{{ Auth::user() ? Auth::user()->name : 'Guest' }}</span>
                 </a>
                 
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" onclick="event.stopPropagation();">
                     <li class="dropdown-header">
                         <h6 class="text-capitalize">{{ Auth::user() ? Auth::user()->name : 'Guest' }}</h6>
                         <div class="text-start">
