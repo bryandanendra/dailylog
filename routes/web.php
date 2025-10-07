@@ -255,6 +255,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cutoff/current', [App\Http\Controllers\TimeCutoffController::class, 'getCurrent'])->name('cutoff.current');
     Route::post('/cutoff/update', [App\Http\Controllers\TimeCutoffController::class, 'update'])->name('cutoff.update');
     
+    // Notification Routes
+    Route::get('/notifications/count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.count');
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'getNotifications'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readall');
+    
     // User Guide Routes
     Route::get('/manual', function () {
         return view('manual.index');

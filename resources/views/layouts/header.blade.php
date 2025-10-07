@@ -20,156 +20,20 @@
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
             <!-- Notification -->
-            <li id="notif-approval" class="nav-item dropdown">
-            </li><li id="notif" class="nav-item dropdown">
+            <li id="notif" class="nav-item dropdown">
                 <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
                     <i class="bi bi-bell"></i>
-                    <span class="badge bg-primary badge-number">2</span>
+                    <span class="badge bg-primary badge-number" id="notif-count" style="display: none;">0</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
-                    <li class="dropdown-header fw-bold text-primary">You have 2 new notifications</li>
+                    <li class="dropdown-header fw-bold text-primary" id="notif-header">You have 0 new notifications</li>
                     <li class="text-center" style="border-bottom: 2px solid blue;"><a href="#" id="mark-all-read" class="text-secondary" style="font-size: 0.9em;">Mark All as Read</a></li>
-                    <ul class="m-0 p-0 overflow-auto" style="max-height: 480px">
-                    <li id="8396" class="notification-item" date="2025-09-01T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: unset;">
-                        <div class="">
-                            <h4>Daily Log Date: 01/09/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>8</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 01/09/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8395" class="notification-item" date="2025-09-01T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: unset;">
-                        <div class="">
-                            <h4>Daily Log Date: 01/09/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 01/09/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8390" class="notification-item" date="2025-09-02T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: unset;">
-                        <div class="">
-                            <h4>Daily Log Date: 02/09/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>9</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 02/09/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8389" class="notification-item" date="2025-09-02T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: unset;">
-                        <div class="">
-                            <h4>Daily Log Date: 02/09/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 02/09/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8349" class="notification-item" date="2025-08-29T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 29/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>8</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 29/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8348" class="notification-item" date="2025-08-29T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 29/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 29/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8343" class="notification-item" date="2025-08-28T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 28/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>7</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 28/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8342" class="notification-item" date="2025-08-28T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 28/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 28/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8336" class="notification-item" date="2025-08-27T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 27/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>4</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 27/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8335" class="notification-item" date="2025-08-27T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 27/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 27/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8327" class="notification-item" date="2025-08-22T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 22/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>9</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 22/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8326" class="notification-item" date="2025-08-22T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 22/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 22/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8321" class="notification-item" date="2025-08-21T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 21/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>8</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 21/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8320" class="notification-item" date="2025-08-21T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 21/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 21/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8315" class="notification-item" date="2025-08-20T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 20/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>9</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 20/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8314" class="notification-item" date="2025-08-20T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 20/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 20/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8309" class="notification-item" date="2025-08-19T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 19/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>2</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 19/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8308" class="notification-item" date="2025-08-19T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 19/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>10</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 19/08/2025 07:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8052" class="notification-item" date="2025-08-18T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 18/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>12</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 18/08/2025 00:00:00</p>
-                        </div>
-                    </li>
-                    <li id="8041" class="notification-item" date="2025-08-15T00:00:00.000Z" style="cursor: pointer; border-bottom: 1px solid #444; background-color: rgba(0,0,0, 0.1);">
-                        <div class="">
-                            <h4>Daily Log Date: 15/08/2025</h4>
-                            <p class="text-dark">Your Supervisor has Approved <b>17</b> Items on your Task.<br></p>
-                            <p class="text-secondary text-end">at 15/08/2025 00:00:00</p>
-                        </div>
-                    </li></ul></ul></li><li class="nav-item dropdown pe-3">
+                    <ul class="m-0 p-0 overflow-auto" id="notif-list" style="max-height: 480px">
+                        <!-- Notifications will be loaded here dynamically -->
+                    </ul>
+                </ul>
+            </li>
+            <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                     <img src="/images/none.png" alt="Profile" class="rounded-circle">
                     <span class="d-none d-md-block dropdown-toggle ps-2 text-capitalize">{{ Auth::user() ? Auth::user()->name : 'Guest' }}</span>
@@ -270,5 +134,114 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
     
     // Submit the form
     this.submit();
+});
+
+// Notification System
+function loadNotifications() {
+    // Load unread count
+    fetch('{{ route('notifications.count') }}')
+        .then(response => response.json())
+        .then(data => {
+            const count = data.count || 0;
+            const badge = document.getElementById('notif-count');
+            const header = document.getElementById('notif-header');
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline';
+                header.textContent = `You have ${count} new notification${count > 1 ? 's' : ''}`;
+            } else {
+                badge.style.display = 'none';
+                header.textContent = 'No new notifications';
+            }
+        })
+        .catch(error => console.error('Error loading notification count:', error));
+    
+    // Load notification list
+    fetch('{{ route('notifications.index') }}')
+        .then(response => response.json())
+        .then(data => {
+            const notifList = document.getElementById('notif-list');
+            notifList.innerHTML = '';
+            
+            if (data.notifications.length === 0) {
+                notifList.innerHTML = `
+                    <li class="text-center py-3 text-muted">
+                        <i class="bi bi-inbox"></i> No notifications
+                    </li>
+                `;
+                return;
+            }
+            
+            data.notifications.forEach(notif => {
+                const li = document.createElement('li');
+                li.className = 'notification-item';
+                li.id = `notif-${notif.id}`;
+                li.style.cssText = `cursor: pointer; border-bottom: 1px solid #ddd; padding: 12px; ${notif.read_status ? 'background-color: rgba(0,0,0, 0.05);' : 'background-color: #e3f2fd;'}`;
+                
+                li.innerHTML = `
+                    <div>
+                        <h6 class="mb-1 fw-bold text-primary">${notif.title}</h6>
+                        <p class="mb-1 text-dark small">${notif.message}</p>
+                        <p class="mb-0 text-secondary text-end" style="font-size: 0.75rem;">${notif.created_at}</p>
+                    </div>
+                `;
+                
+                // Mark as read on click
+                li.addEventListener('click', function() {
+                    if (!notif.read_status) {
+                        markAsRead(notif.id);
+                    }
+                });
+                
+                notifList.appendChild(li);
+            });
+        })
+        .catch(error => console.error('Error loading notifications:', error));
+}
+
+function markAsRead(notifId) {
+    fetch(`/notifications/${notifId}/read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadNotifications(); // Reload notifications
+        }
+    })
+    .catch(error => console.error('Error marking notification as read:', error));
+}
+
+// Mark all as read
+document.getElementById('mark-all-read').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    fetch('{{ route('notifications.readall') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadNotifications(); // Reload notifications
+        }
+    })
+    .catch(error => console.error('Error marking all as read:', error));
+});
+
+// Load notifications on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications();
+    
+    // Reload notifications every 30 seconds
+    setInterval(loadNotifications, 30000);
 });
 </script>

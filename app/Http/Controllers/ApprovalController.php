@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Log;
 use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 
 class ApprovalController extends Controller
@@ -168,6 +169,8 @@ class ApprovalController extends Controller
         $date2 = $request->query('date2');
         $rows = json_decode($request->query('data','[]'), true);
 
+        $approvedLogs = []; // Track approved logs for notification
+
         foreach ($rows as $row) {
             $log = Log::find($row['id']);
             if (!$log) continue;
@@ -175,12 +178,41 @@ class ApprovalController extends Controller
             // authorize
             if (!Auth::user()->can('approve-log', $log)) continue;
 
+            $wasApproved = $log->approved;
             $log->approved = $row['approved'] ? true : false;
             $log->approved_date = $row['approved_date'] ?? $date2;
             $log->approved_note = $row['approved_note'] ?? null;
             $log->approved_emoji = $row['approved_emoji'] ?? null;
             $log->approved_by = Auth::id();
             $log->save();
+
+            // Track newly approved logs for notification
+            if (!$wasApproved && $log->approved) {
+                if (!isset($approvedLogs[$log->employee_id])) {
+                    $approvedLogs[$log->employee_id] = [
+                        'employee' => $log->employee,
+                        'count' => 0,
+                        'date' => $log->date
+                    ];
+                }
+                $approvedLogs[$log->employee_id]['count']++;
+            }
+        }
+
+        // Create notifications for approved logs
+        foreach ($approvedLogs as $employeeId => $data) {
+            $approverName = Auth::user()->name;
+            $taskCount = $data['count'];
+            $taskWord = $taskCount === 1 ? 'task' : 'tasks';
+            $date = \Carbon\Carbon::parse($data['date'])->format('d/m/Y');
+            
+            Notification::create([
+                'employee_id' => $employeeId,
+                'title' => 'Daily Log Approved',
+                'message' => "{$approverName} has approved {$taskCount} {$taskWord} from your daily log on {$date}.",
+                'date' => now(),
+                'read_status' => false
+            ]);
         }
 
         return response()->json(true);
