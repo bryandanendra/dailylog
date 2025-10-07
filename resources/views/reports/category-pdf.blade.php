@@ -4,18 +4,23 @@
     <meta charset="utf-8">
     <title>Category Report - {{ $date }}</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: Arial, sans-serif;
             font-size: 10px;
-            margin: 0;
             padding: 10px;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
         
         .header h1 {
@@ -31,8 +36,7 @@
         }
         
         .category-section {
-            margin-bottom: 30px;
-            page-break-inside: avoid;
+            margin-bottom: 20px;
         }
         
         .category-title {
@@ -45,8 +49,7 @@
         }
         
         .employee-section {
-            margin-bottom: 20px;
-            page-break-inside: avoid;
+            margin-bottom: 15px;
         }
         
         .employee-info {
@@ -101,7 +104,7 @@
         }
         
         @page {
-            margin: 1cm;
+            margin: 0.5cm;
             size: A4 landscape;
         }
         
@@ -136,8 +139,15 @@
                 
                 @foreach($category['employee'] as $employee)
                     <div class="employee-section">
+                        @php
+                            $empData = explode(',', $employee['employee']);
+                            $empName = $empData[0] ?? '';
+                            $empDivision = $empData[1] ?? '';
+                            $empSubdivision = $empData[2] ?? '';
+                        @endphp
                         <div class="employee-info">
-                            <div>Name: {{ $employee['employee'] }}</div>
+                            <div>Name: {{ $empName }}{{ $empSubdivision ? ',' . $empSubdivision : '' }}</div>
+                            <div>Division: {{ $empDivision }}</div>
                             <div>Date: {{ \Carbon\Carbon::parse($date)->format('l, j F Y') }}</div>
                         </div>
                         
