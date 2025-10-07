@@ -1,2 +1,5 @@
 /BI Report Table-1 2025-09-01 - 2025-09-05.csv
 /BI Report Table-2 2025-09-01 - 2025-09-05.csv
+
+# Playwright screenshots and test files
+.playwright-mcp/

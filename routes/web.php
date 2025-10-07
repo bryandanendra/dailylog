@@ -251,9 +251,9 @@ Route::middleware(['auth'])->group(function () {
     })->name('backup.index');
     
     // Time Cut Off Routes
-    Route::get('/cutoff', function () {
-        return view('cutoff.index');
-    })->name('cutoff.index');
+    Route::get('/cutoff', [App\Http\Controllers\TimeCutoffController::class, 'index'])->name('cutoff.index');
+    Route::get('/cutoff/current', [App\Http\Controllers\TimeCutoffController::class, 'getCurrent'])->name('cutoff.current');
+    Route::post('/cutoff/update', [App\Http\Controllers\TimeCutoffController::class, 'update'])->name('cutoff.update');
     
     // User Guide Routes
     Route::get('/manual', function () {
