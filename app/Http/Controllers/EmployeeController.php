@@ -1,0 +1,314 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Employee;
+use App\Models\Division;
+use App\Models\SubDivision;
+use App\Models\Role;
+use App\Models\Position;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+
+class EmployeeController extends Controller
+{
+    public function index()
+    {
+        return view('employee.index');
+    }
+
+    public function getData(Request $request)
+    {
+        $params = json_decode($request->get('data'), true);
+        
+        $page = $params['page'] ?? 1;
+        $limit = $params['limit'] ?? 25;
+        $search = $params['search'] ?? '';
+        $sort = $params['sort'] ?? 'id';
+        $order = $params['order'] ?? 'ASC';
+        $tab = $params['tab'] ?? 1;
+
+        $query = Employee::with(['division', 'subDivision', 'role', 'position', 'superior'])
+            ->select('employees.*');
+
+        // Filter berdasarkan tab
+        switch ($tab) {
+            case 1: // Current Employees
+                $query->where('archive', false)->where('is_approved', true);
+                break;
+            case 2: // Registration Request
+                $query->where('archive', false)->where('is_approved', false);
+                break;
+            case 3: // Archive Employees
+                $query->where('archive', true);
+                break;
+        }
+
+        // Search functionality
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('username', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Sorting
+        $query->orderBy($sort, $order);
+
+        // Pagination
+        $total = $query->count();
+        $employees = $query->skip(($page - 1) * $limit)
+                          ->take($limit)
+                          ->get();
+
+        // Format data untuk frontend
+        $formattedData = [];
+        $offset = ($page - 1) * $limit;
+
+        foreach ($employees as $employee) {
+            $formattedData[] = [
+                'id' => $employee->id,
+                'title' => $employee->name,
+                'username' => $employee->username,
+                'join_date' => $employee->join_date ? $employee->join_date->format('Y-m-d') : null,
+                'administrator' => $employee->is_admin,
+                'approved' => $employee->can_approve,
+                'archive' => $employee->archive,
+                'archivereport' => $employee->cutoff_exception,
+                'monthlyreport' => true, // Default values
+                'bireport' => true,
+                'regularreport' => true,
+                'categoryreport' => true,
+                'parent_id' => $employee->superior_id,
+                'order_pos' => 0,
+                'division_id' => $employee->division_id,
+                'subdivision_id' => $employee->sub_division_id,
+                'role_id' => $employee->role_id,
+                'position_id' => $employee->position_id,
+                'description' => $employee->description,
+                'slack_channel' => '',
+                'offset' => ++$offset
+            ];
+        }
+
+        $result = [
+            'rows' => $formattedData,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'search' => $search,
+            'sort' => $sort,
+            'order' => $order
+        ];
+
+        return response()->json(json_encode($result));
+    }
+
+    public function getCombo()
+    {
+        $divisions = Division::where('archive', false)->get(['id', 'title']);
+        $subdivisions = SubDivision::where('archive', false)->get(['id', 'title']);
+        $roles = Role::where('archive', false)->get(['id', 'title']);
+        $positions = Position::where('archive', false)->get(['id', 'title']);
+        $employees = Employee::where('archive', false)->get(['id', 'name as title']);
+
+        $combo = [
+            'division' => $divisions,
+            'subdivision' => $subdivisions,
+            'role' => $roles,
+            'position' => $positions,
+            'parent' => $employees
+        ];
+
+        return response()->json(json_encode($combo));
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|email|unique:employees,username',
+            'password' => 'required|string|min:6',
+            'join_date' => 'required|date',
+            'division_id' => 'required|exists:divisions,id',
+            'sub_division_id' => 'required|exists:sub_divisions,id',
+            'role_id' => 'required|exists:roles,id',
+            'position_id' => 'required|exists:positions,id',
+        ]);
+        
+        // Validasi tambahan untuk email
+        $request->validate([
+            'username' => 'unique:employees,email',
+        ]);
+
+        $employee = Employee::create([
+            'name' => $validatedData['name'],
+            'username' => $validatedData['username'],
+            'email' => $validatedData['username'], // Menggunakan username (email) sebagai email
+            'password' => Hash::make($validatedData['password']),
+            'join_date' => $validatedData['join_date'],
+            'division_id' => $validatedData['division_id'],
+            'sub_division_id' => $validatedData['sub_division_id'],
+            'role_id' => $validatedData['role_id'],
+            'position_id' => $validatedData['position_id'],
+            'superior_id' => $request->superior_id ?? null,
+            'description' => $request->description ?? null,
+            'is_admin' => $request->is_admin ?? false,
+            'can_approve' => $request->can_approve ?? false,
+            'cutoff_exception' => $request->cutoff_exception ?? false,
+            'archive' => false,
+            'is_approved' => false // Employee baru belum diapprove
+        ]);
+
+        return response()->json(['success' => true, 'employee' => $employee]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
+        
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|email|unique:employees,username,' . $id,
+            'join_date' => 'required|date',
+            'division_id' => 'required|exists:divisions,id',
+            'sub_division_id' => 'required|exists:sub_divisions,id',
+            'role_id' => 'required|exists:roles,id',
+            'position_id' => 'required|exists:positions,id',
+        ]);
+        
+        // Validasi tambahan untuk email
+        $request->validate([
+            'username' => 'unique:employees,email,' . $id,
+        ]);
+
+        $updateData = [
+            'name' => $validatedData['name'],
+            'username' => $validatedData['username'],
+            'email' => $validatedData['username'], // Menggunakan username (email) sebagai email
+            'join_date' => $validatedData['join_date'],
+            'division_id' => $validatedData['division_id'],
+            'sub_division_id' => $validatedData['sub_division_id'],
+            'role_id' => $validatedData['role_id'],
+            'position_id' => $validatedData['position_id'],
+            'superior_id' => $request->superior_id ?? $employee->superior_id,
+            'description' => $request->description ?? $employee->description,
+            'is_admin' => $request->is_admin ?? $employee->is_admin,
+            'can_approve' => $request->can_approve ?? $employee->can_approve,
+            'cutoff_exception' => $request->cutoff_exception ?? $employee->cutoff_exception,
+            'archive' => $request->archive ?? $employee->archive
+        ];
+
+        // Update password only if provided
+        if ($request->password) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $employee->update($updateData);
+
+        return response()->json(['success' => true, 'employee' => $employee]);
+    }
+
+    public function destroy(Request $request)
+    {
+        $id = $request->get('id');
+        $employee = Employee::findOrFail($id);
+        $employee->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function show($id)
+    {
+        $employee = Employee::with(['division', 'subDivision', 'role', 'position', 'superior'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'username' => $employee->username,
+                'join_date' => $employee->join_date ? $employee->join_date->format('Y-m-d') : null,
+                'division_id' => $employee->division_id,
+                'sub_division_id' => $employee->sub_division_id,
+                'role_id' => $employee->role_id,
+                'position_id' => $employee->position_id,
+                'superior_id' => $employee->superior_id,
+                'description' => $employee->description,
+                'is_admin' => $employee->is_admin,
+                'can_approve' => $employee->can_approve,
+                'cutoff_exception' => $employee->cutoff_exception,
+                'archive' => $employee->archive
+            ]
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $id = $request->get('id');
+        $newPassword = $request->get('newpass');
+        
+        $employee = Employee::findOrFail($id);
+        $employee->update([
+            'password' => Hash::make($newPassword)
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+    
+    public function approveRegistration(Request $request)
+    {
+        $id = $request->get('id');
+        $employee = Employee::findOrFail($id);
+        
+        $employee->update([
+            'is_approved' => true
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Employee registration approved successfully']);
+    }
+
+    public function rejectRegistration(Request $request)
+    {
+        $id = $request->get('id');
+        $employee = Employee::findOrFail($id);
+        
+        $employee->update([
+            'archive' => true  // Archive the employee (soft delete)
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Employee registration rejected']);
+    }
+
+    public function bulkApprove(Request $request)
+    {
+        $ids = $request->get('ids', []);
+        
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No employees selected']);
+        }
+
+        Employee::whereIn('id', $ids)->update([
+            'is_approved' => true
+        ]);
+
+        return response()->json(['success' => true, 'message' => count($ids) . ' employee registrations approved']);
+    }
+
+    public function bulkReject(Request $request)
+    {
+        $ids = $request->get('ids', []);
+        
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No employees selected']);
+        }
+
+        Employee::whereIn('id', $ids)->update([
+            'archive' => true
+        ]);
+
+        return response()->json(['success' => true, 'message' => count($ids) . ' employee registrations rejected']);
+    }
+}

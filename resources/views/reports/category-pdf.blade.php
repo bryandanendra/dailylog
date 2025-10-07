@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Category Report - {{ $date }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .header h2 {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .category-section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .category-title {
+            background-color: #007bff;
+            color: white;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .employee-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+        
+        .employee-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .employee-info div {
+            margin: 2px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 9px;
+        }
+        
+        th, td {
+            border: 1px solid #333;
+            padding: 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        tfoot th {
+            background-color: #333;
+            color: white;
+        }
+        
+        .total-hours {
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        @page {
+            margin: 1cm;
+            size: A4 landscape;
+        }
+        
+        @media print {
+            .category-section {
+                page-break-inside: avoid;
+            }
+            
+            .employee-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Category Report</h1>
+        <h2>Date: {{ \Carbon\Carbon::parse($date)->format('l, j F Y') }}</h2>
+        <h2>Categories: {{ implode(', ', $selectedCategories) }}</h2>
+    </div>
+
+    @if(empty($categoryData))
+        <div class="no-data">
+            <h3>No data available for the selected date and categories.</h3>
+        </div>
+    @else
+        @foreach($categoryData as $category)
+            <div class="category-section">
+                <div class="category-title">
+                    Category: {{ $category['category'] }}
+                </div>
+                
+                @foreach($category['employee'] as $employee)
+                    <div class="employee-section">
+                        <div class="employee-info">
+                            <div>Name: {{ $employee['employee'] }}</div>
+                            <div>Date: {{ \Carbon\Carbon::parse($date)->format('l, j F Y') }}</div>
+                        </div>
+                        
+                        @if(!empty($employee['items']))
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%;">No</th>
+                                        <th style="width: 20%;">Subject / Address</th>
+                                        <th style="width: 20%;">Description</th>
+                                        <th style="width: 8%;">Unit Qty</th>
+                                        <th style="width: 12%;">Category</th>
+                                        <th style="width: 12%;">Task</th>
+                                        <th style="width: 12%;">Builder</th>
+                                        <th style="width: 12%;">Dwelling</th>
+                                        <th style="width: 10%;">Status</th>
+                                        <th style="width: 8%;">Duration Minutes</th>
+                                        <th style="width: 20%;">Additional Notes</th>
+                                        <th style="width: 10%;">Work Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $totalMinutes = 0;
+                                        $rowNumber = 1;
+                                    @endphp
+                                    
+                                    @foreach($employee['items'] as $item)
+                                        <tr>
+                                            <td>{{ $rowNumber }}</td>
+                                            <td>{{ $item['title'] }}</td>
+                                            <td>{{ $item['description'] }}</td>
+                                            <td>{{ $item['qty'] }}</td>
+                                            <td>{{ $item['category'] }}</td>
+                                            <td>{{ $item['task'] }}</td>
+                                            <td>{{ $item['builder'] }}</td>
+                                            <td>{{ $item['dweling'] }}</td>
+                                            <td>{{ $item['status'] }}</td>
+                                            <td>{{ $item['duration'] }}</td>
+                                            <td>{{ $item['note'] }}</td>
+                                            <td>{{ $item['wtime'] }}</td>
+                                        </tr>
+                                        @php
+                                            $totalMinutes += $item['duration'];
+                                            $rowNumber++;
+                                        @endphp
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="9">Total Hours:</th>
+                                        <th class="total-hours">{{ number_format($totalMinutes / 60, 2) }}</th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        @else
+                            <div class="no-data">
+                                <p>No logs found for this employee in this category.</p>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endforeach
+    @endif
+</body>
+</html>
