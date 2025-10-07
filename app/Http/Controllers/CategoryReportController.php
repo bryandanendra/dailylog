@@ -23,13 +23,50 @@ class CategoryReportController extends Controller
             return response()->json([]);
         }
 
-        // Get all SPDR Team employees with their logs for the specific date
+        $currentUser = auth()->user();
+        $currentEmployee = Employee::where('user_id', $currentUser->id)->first();
+
+        if (!$currentEmployee) {
+            return response()->json(['category' => []]);
+        }
+
+        // Get employees based on approval hierarchy logic
+        // Same logic as ApprovalController
         $employees = Employee::with(['user', 'division', 'subDivision', 'role', 'position'])
-            ->where('division_id', 1) // SPDR Team division
+            ->where('archive', false)
             ->whereHas('logs', function($query) use ($date) {
                 $query->where('date', $date);
-            })
-            ->get();
+            });
+
+        // Filter based on can_approve permission and hierarchy
+        if ($currentUser->can_approve) {
+            // Get current user's position level
+            $currentPositionLevel = config('approval.position_levels')[$currentEmployee->position->title] ?? 0;
+            
+            $employees = $employees->where(function($query) use ($currentEmployee, $currentPositionLevel) {
+                // Same division employees
+                $query->where('division_id', $currentEmployee->division_id)
+                    ->where(function($q) use ($currentEmployee, $currentPositionLevel) {
+                        // Subordinates (employees whose superior is current user)
+                        $q->where('superior_id', $currentEmployee->id)
+                        // OR employees with lower position level in same division
+                        ->orWhereHas('position', function($pq) use ($currentPositionLevel) {
+                            $positionTitles = collect(config('approval.position_levels'))
+                                ->filter(function($level) use ($currentPositionLevel) {
+                                    return $level < $currentPositionLevel;
+                                })
+                                ->keys()
+                                ->toArray();
+                            $pq->whereIn('title', $positionTitles);
+                        });
+                    });
+            });
+        } else {
+            // Regular employees can only see their own logs
+            $employees = $employees->where('id', $currentEmployee->id);
+        }
+
+        $employees = $employees->get();
 
         $result = [];
 
@@ -130,13 +167,49 @@ class CategoryReportController extends Controller
     
     private function getCategoryDataForDate($date, $selectedCategories)
     {
-        // Get all SPDR Team employees with their logs for the specific date
+        $currentUser = auth()->user();
+        $currentEmployee = Employee::where('user_id', $currentUser->id)->first();
+
+        if (!$currentEmployee) {
+            return [];
+        }
+
+        // Get employees based on approval hierarchy logic
         $employees = Employee::with(['user', 'division', 'subDivision', 'role', 'position'])
-            ->where('division_id', 1) // SPDR Team division
+            ->where('archive', false)
             ->whereHas('logs', function($query) use ($date) {
                 $query->where('date', $date);
-            })
-            ->get();
+            });
+
+        // Filter based on can_approve permission and hierarchy
+        if ($currentUser->can_approve) {
+            // Get current user's position level
+            $currentPositionLevel = config('approval.position_levels')[$currentEmployee->position->title] ?? 0;
+            
+            $employees = $employees->where(function($query) use ($currentEmployee, $currentPositionLevel) {
+                // Same division employees
+                $query->where('division_id', $currentEmployee->division_id)
+                    ->where(function($q) use ($currentEmployee, $currentPositionLevel) {
+                        // Subordinates (employees whose superior is current user)
+                        $q->where('superior_id', $currentEmployee->id)
+                        // OR employees with lower position level in same division
+                        ->orWhereHas('position', function($pq) use ($currentPositionLevel) {
+                            $positionTitles = collect(config('approval.position_levels'))
+                                ->filter(function($level) use ($currentPositionLevel) {
+                                    return $level < $currentPositionLevel;
+                                })
+                                ->keys()
+                                ->toArray();
+                            $pq->whereIn('title', $positionTitles);
+                        });
+                    });
+            });
+        } else {
+            // Regular employees can only see their own logs
+            $employees = $employees->where('id', $currentEmployee->id);
+        }
+
+        $employees = $employees->get();
 
         $result = [];
 
