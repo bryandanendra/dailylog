@@ -378,10 +378,11 @@
                 <span class="nav-text">Time Cut Off</span>
             </a>
             
-            <a class="nav-link {{ request()->is('manual*') ? 'active' : '' }}" href="{{ route('manual.index') }}">
+            {{-- User Guide link disabled --}}
+            {{-- <a class="nav-link {{ request()->is('manual*') ? 'active' : '' }}" href="{{ route('manual.index') }}">
                 <i class="bi bi-book"></i>
                 <span class="nav-text">User Guide</span>
-            </a>
+            </a> --}}
             
             <div class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#tables-nav" role="button">

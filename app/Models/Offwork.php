@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Offwork extends Model
 {
+    protected $table = 'offwork'; // Specify table name explicitly
+    
     protected $fillable = [
         'title',
         'date',

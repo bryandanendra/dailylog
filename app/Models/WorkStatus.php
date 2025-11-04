@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class WorkStatus extends Model
 {
+    protected $table = 'work_status'; // Specify table name explicitly
+    
     protected $fillable = [
         'title',
         'description',

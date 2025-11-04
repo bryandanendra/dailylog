@@ -246,9 +246,26 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/employee/bulk-reject', [App\Http\Controllers\EmployeeController::class, 'bulkReject'])->name('employee.bulk-reject');
     
     // Backup Routes
-    Route::get('/backup', function () {
-        return view('backup.index');
-    })->name('backup.index');
+    Route::get('/backup', [App\Http\Controllers\BackupController::class, 'index'])->name('backup.index');
+    Route::get('/backup/divisions', [App\Http\Controllers\BackupController::class, 'exportDivisions'])->name('backup.divisions');
+    Route::get('/backup/subdivisions', [App\Http\Controllers\BackupController::class, 'exportSubDivisions'])->name('backup.subdivisions');
+    Route::get('/backup/roles', [App\Http\Controllers\BackupController::class, 'exportRoles'])->name('backup.roles');
+    Route::get('/backup/positions', [App\Http\Controllers\BackupController::class, 'exportPositions'])->name('backup.positions');
+    Route::get('/backup/categories', [App\Http\Controllers\BackupController::class, 'exportCategories'])->name('backup.categories');
+    Route::get('/backup/tasks', [App\Http\Controllers\BackupController::class, 'exportTasks'])->name('backup.tasks');
+    Route::get('/backup/builders', [App\Http\Controllers\BackupController::class, 'exportBuilders'])->name('backup.builders');
+    Route::get('/backup/dwelings', [App\Http\Controllers\BackupController::class, 'exportDwelings'])->name('backup.dwelings');
+    Route::get('/backup/status', [App\Http\Controllers\BackupController::class, 'exportStatus'])->name('backup.status');
+    Route::get('/backup/workstatus', [App\Http\Controllers\BackupController::class, 'exportWorkStatus'])->name('backup.workstatus');
+    Route::get('/backup/employees', [App\Http\Controllers\BackupController::class, 'exportEmployees'])->name('backup.employees');
+    Route::get('/backup/logs', [App\Http\Controllers\BackupController::class, 'exportLogs'])->name('backup.logs');
+    Route::get('/backup/offwork', [App\Http\Controllers\BackupController::class, 'exportOffwork'])->name('backup.offwork');
+    Route::get('/backup/holidays', [App\Http\Controllers\BackupController::class, 'exportHolidays'])->name('backup.holidays');
+    Route::get('/backup/leavetypes', [App\Http\Controllers\BackupController::class, 'exportLeaveTypes'])->name('backup.leavetypes');
+    Route::get('/backup/users', [App\Http\Controllers\BackupController::class, 'exportUsers'])->name('backup.users');
+    Route::get('/backup/notifications', [App\Http\Controllers\BackupController::class, 'exportNotifications'])->name('backup.notifications');
+    Route::get('/backup/timecutoff', [App\Http\Controllers\BackupController::class, 'exportTimeCutoff'])->name('backup.timecutoff');
+    Route::get('/backup/all', [App\Http\Controllers\BackupController::class, 'exportAll'])->name('backup.all');
     
     // Time Cut Off Routes
     Route::get('/cutoff', [App\Http\Controllers\TimeCutoffController::class, 'index'])->name('cutoff.index');
@@ -261,10 +278,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readall');
     
-    // User Guide Routes
-    Route::get('/manual', function () {
-        return view('manual.index');
-    })->name('manual.index');
+    // User Guide Routes (disabled)
+    // Route::get('/manual', function () {
+    //     return view('manual.index');
+    // })->name('manual.index');
     
     // Master Data Tables Routes
     Route::prefix('table')->group(function () {
