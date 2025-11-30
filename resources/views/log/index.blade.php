@@ -569,12 +569,16 @@ document.getElementById('btn-saveRow').addEventListener('click', function() {
             return;
         }
         
+        const qtyText = row.querySelector('.log[field="qty"]').textContent.trim();
+        const qtyValue = qtyText === '' ? 1 : parseInt(qtyText);
+        const qty = isNaN(qtyValue) ? 1 : qtyValue;
+        
         const logData = {
             id: row.id.startsWith('new-') ? null : row.id,
             date: document.getElementById('chaDate').value,
             subject: row.querySelector('.log[field="subject"]').textContent.trim(),
             description: row.querySelector('.log[field="description"]').textContent.trim(),
-            qty: parseInt(row.querySelector('.log[field="qty"]').textContent) || 1,
+            qty: qty >= 0 ? qty : 1,
             category: row.querySelector('.category[field="category"]').textContent.trim(),
             task: row.querySelector('.task[field="task"]').textContent.trim(),
             builder: row.querySelector('.builder[field="builder"]').textContent.trim(),
@@ -673,12 +677,16 @@ function debugCurrentData() {
     rows.forEach((row, index) => {
         if (row.id === 'no-data') return;
         
+        const qtyText = row.querySelector('.log[field="qty"]').textContent.trim();
+        const qtyValue = qtyText === '' ? 1 : parseInt(qtyText);
+        const qty = isNaN(qtyValue) ? 1 : qtyValue;
+        
         const logData = {
             id: row.id.startsWith('new-') ? null : row.id,
             date: document.getElementById('chaDate').value,
             subject: row.querySelector('.log[field="subject"]').textContent.trim(),
             description: row.querySelector('.log[field="description"]').textContent.trim(),
-            qty: parseInt(row.querySelector('.log[field="qty"]').textContent) || 1,
+            qty: qty >= 0 ? qty : 1,
             category: row.querySelector('.category[field="category"]').textContent.trim(),
             task: row.querySelector('.task[field="task"]').textContent.trim(),
             builder: row.querySelector('.builder[field="builder"]').textContent.trim(),
@@ -724,6 +732,78 @@ document.addEventListener('DOMContentLoaded', function() {
     debugBtn.style.outline = 'none';
     debugBtn.style.minWidth = '80px';
     document.querySelector('.card-header').appendChild(debugBtn);
+});
+
+// Auto-refresh to check for approval status changes
+let autoRefreshInterval = null;
+let lastApprovalCheck = null;
+
+function checkApprovalStatus() {
+    const rows = document.querySelectorAll('#logsTableBody tr[id]:not([id="no-data"])');
+    const logIds = Array.from(rows).map(row => row.id).filter(id => !id.startsWith('new-'));
+    
+    if (logIds.length === 0) return;
+    
+    // Check if any log has been approved
+    fetch(`/log/checkApproval?ids=${logIds.join(',')}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                let needsReload = false;
+                data.forEach(log => {
+                    const row = document.getElementById(log.id);
+                    if (row) {
+                        const currentApproved = row.getAttribute('app') === '1';
+                        if (log.approved && !currentApproved) {
+                            needsReload = true;
+                        }
+                    }
+                });
+                
+                if (needsReload) {
+                    // Reload page to show updated approval status
+                    location.reload();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking approval status:', error);
+        });
+}
+
+// Start auto-refresh every 10 seconds
+function startAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+    autoRefreshInterval = setInterval(checkApprovalStatus, 10000); // Check every 10 seconds
+}
+
+// Stop auto-refresh
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startAutoRefresh();
+    
+    // Stop auto-refresh when user is editing (to avoid interruption)
+    document.addEventListener('focusin', function(e) {
+        if (e.target.contentEditable === 'true' || e.target.tagName === 'INPUT') {
+            stopAutoRefresh();
+        }
+    });
+    
+    // Resume auto-refresh when user stops editing
+    document.addEventListener('focusout', function(e) {
+        if (e.target.contentEditable === 'true' || e.target.tagName === 'INPUT') {
+            setTimeout(startAutoRefresh, 5000); // Resume after 5 seconds
+        }
+    });
 });
 
 // Reload Function
@@ -1113,4 +1193,11 @@ td[data-date].disabled,
 .table th:nth-child(11), .table td:nth-child(11) { width: 80px; min-width: 60px; } /* Duration */
 .table th:nth-child(12), .table td:nth-child(12) { width: 150px; min-width: 100px; } /* Additional Notes */
 .table th:nth-child(13), .table td:nth-child(13) { width: 60px; min-width: 50px; } /* Overtime */
+
+/* Fixed columns - yellow background with low opacity (only for data cells, not header/footer) */
+.table td:nth-child(6) { background-color: rgba(249, 225, 10, 0.7) !important; padding: 2px 6px !important; } /* Category */
+.table td:nth-child(7) { background-color: rgba(249, 225, 10, 0.7) !important; padding: 2px 6px !important; } /* Task */
+.table td:nth-child(8) { background-color: rgba(249, 225, 10, 0.7) !important; padding: 2px 6px !important; } /* Builder */
+.table td:nth-child(9) { background-color: rgba(249, 225, 10, 0.7) !important; padding: 2px 6px !important; } /* Dwelling */
+.table td:nth-child(10) { background-color: rgba(249, 225, 10, 0.7) !important; padding: 2px 6px !important; } /* Status */
 </style>

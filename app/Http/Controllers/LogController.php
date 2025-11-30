@@ -43,7 +43,7 @@ class LogController extends Controller
             'date' => 'required|date',
             'subject' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required|integer|min:0',
             'category' => 'nullable|string',
             'task' => 'nullable|string',
             'builder' => 'nullable|string',
@@ -123,7 +123,7 @@ class LogController extends Controller
         $request->validate([
             'subject' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required|integer|min:0',
             'category' => 'nullable|string',
             'task' => 'nullable|string',
             'builder' => 'nullable|string',
@@ -245,5 +245,24 @@ class LogController extends Controller
             'dwelings' => $dwelings,
             'statuses' => $statuses
         ]);
+    }
+    
+    public function checkApproval(Request $request)
+    {
+        $user = Auth::user();
+        $employee = Employee::where('email', $user->email)->first();
+        
+        $ids = $request->query('ids');
+        if (!$ids) {
+            return response()->json([]);
+        }
+        
+        $logIds = explode(',', $ids);
+        $logs = Log::where('employee_id', $employee->id)
+                   ->whereIn('id', $logIds)
+                   ->select('id', 'approved')
+                   ->get();
+        
+        return response()->json($logs);
     }
 }

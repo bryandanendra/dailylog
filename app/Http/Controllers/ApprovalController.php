@@ -41,27 +41,73 @@ class ApprovalController extends Controller
         return response()->json($reasons);
     }
 
+    /**
+     * Check if current user is in the superior hierarchy of an employee
+     * This traverses the superior chain to find if current user is a supervisor
+     */
+    private function isInSuperiorHierarchy(Employee $employee, $currentUserId, $maxDepth = 10)
+    {
+        if (!$employee->superior_id) {
+            return false;
+        }
+        
+        $current = $employee;
+        $depth = 0;
+        
+        while ($current && $current->superior_id && $depth < $maxDepth) {
+            // Load superior relationship with user if not already loaded
+            if (!$current->relationLoaded('superior')) {
+                $current->load('superior.user');
+            } elseif ($current->superior && !$current->superior->relationLoaded('user')) {
+                $current->superior->load('user');
+            }
+            
+            // If superior doesn't exist, stop
+            if (!$current->superior) {
+                break;
+            }
+            
+            // Check if current user is the superior (compare user_id)
+            if ($current->superior->user_id && $current->superior->user_id == $currentUserId) {
+                return true;
+            }
+            
+            // Move up the hierarchy
+            $current = $current->superior;
+            $depth++;
+        }
+        
+        return false;
+    }
+
     public function getData(Request $request)
     {
         $date = $request->query('date');
         $employeeId = $request->query('id'); // optional supervisor filter
         $currentUser = Auth::user();
+        
+        // Get can_approve from Employee if exists, otherwise from User
+        $currentEmployee = Employee::where('email', $currentUser->email)->first();
+        $canApprove = $currentEmployee ? $currentEmployee->can_approve : $currentUser->can_approve;
+        $isAdmin = $currentEmployee ? $currentEmployee->is_admin : $currentUser->is_admin;
+
+        if (!$canApprove && !$isAdmin) {
+            return response()->json([]);
+        }
 
         // Get employees that this user can approve (superior hierarchy)
-        $employees = Employee::with(['user','division','subDivision','role','position','superior'])
+        $employees = Employee::with(['user','division','subDivision','role','position','superior.user'])
             ->where('division_id', $currentUser->division_id) // Use current user's division
             ->get()
             ->filter(function($employee) use ($currentUser) {
-                // Check if current user can approve this employee's logs
-                $levels = config('approval.position_levels');
-                $approverLevel = $levels[$currentUser->position->title ?? ''] ?? 0;
-                $employeeLevel = $levels[$employee->position->title ?? ''] ?? 0;
+                // Only approve employees where current user is in the superior hierarchy
+                // Even admin must follow the hierarchy structure
+                if (!$employee->superior_id) {
+                    return false; // No supervisor means no one can approve
+                }
                 
-                $isSuperior = $employee->superior_id && $employee->superior?->user_id === $currentUser->id;
-                $higherPos = $approverLevel > $employeeLevel;
-                $sameDiv = $currentUser->division_id && $employee->division_id && $currentUser->division_id === $employee->division_id;
-                
-                return ($isSuperior || $higherPos) && $sameDiv && (bool) $currentUser->can_approve;
+                // Check if current user is in the superior chain
+                return $this->isInSuperiorHierarchy($employee, $currentUser->id);
             });
 
         $result = [];
@@ -222,20 +268,31 @@ class ApprovalController extends Controller
     {
         $user = Auth::user();
         
+        // Get can_approve from Employee if exists, otherwise from User
+        $currentEmployee = Employee::where('email', $user->email)->first();
+        $canApprove = $currentEmployee ? $currentEmployee->can_approve : $user->can_approve;
+        $isAdmin = $currentEmployee ? $currentEmployee->is_admin : $user->is_admin;
+        
+        if (!$canApprove && !$isAdmin) {
+            return response()->json([
+                'userid' => $user?->id,
+                'result' => [],
+            ]);
+        }
+        
         // Get employees that this user can approve
-        $employees = Employee::with(['user','division','subDivision','role','position','superior'])
+        $employees = Employee::with(['user','division','subDivision','role','position','superior.user'])
             ->where('division_id', $user->division_id) // Use current user's division
             ->get()
             ->filter(function($employee) use ($user) {
-                $levels = config('approval.position_levels');
-                $approverLevel = $levels[$user->position->title ?? ''] ?? 0;
-                $employeeLevel = $levels[$employee->position->title ?? ''] ?? 0;
+                // Only approve employees where current user is in the superior hierarchy
+                // Even admin must follow the hierarchy structure
+                if (!$employee->superior_id) {
+                    return false; // No supervisor means no one can approve
+                }
                 
-                $isSuperior = $employee->superior_id && $employee->superior?->user_id === $user->id;
-                $higherPos = $approverLevel > $employeeLevel;
-                $sameDiv = $user->division_id && $employee->division_id && $user->division_id === $employee->division_id;
-                
-                return ($isSuperior || $higherPos) && $sameDiv && (bool) $user->can_approve;
+                // Check if current user is in the superior chain
+                return $this->isInSuperiorHierarchy($employee, $user->id);
             });
 
         $employeeIds = $employees->pluck('id')->toArray();
@@ -268,6 +325,39 @@ class ApprovalController extends Controller
         // Stub minimal autocomplete source (no-op backend; UI already populated via existing tables in app)
         $tbl = $request->query('tbl');
         return response()->json([]);
+    }
+
+    public function debug(Request $request)
+    {
+        $currentUser = Auth::user();
+        $currentEmployee = Employee::where('email', $currentUser->email)->first();
+        
+        $employees = Employee::with(['user','superior.user'])
+            ->where('division_id', $currentUser->division_id)
+            ->get();
+        
+        $result = [];
+        foreach ($employees as $employee) {
+            $canApprove = $this->isInSuperiorHierarchy($employee, $currentUser->id);
+            $result[] = [
+                'employee_id' => $employee->id,
+                'employee_name' => $employee->name,
+                'superior_id' => $employee->superior_id,
+                'superior_name' => $employee->superior ? $employee->superior->name : 'NULL',
+                'superior_user_id' => $employee->superior ? $employee->superior->user_id : 'NULL',
+                'current_user_id' => $currentUser->id,
+                'can_approve' => $canApprove,
+            ];
+        }
+        
+        return response()->json([
+            'current_user' => [
+                'id' => $currentUser->id,
+                'name' => $currentUser->name,
+                'email' => $currentUser->email,
+            ],
+            'employees' => $result,
+        ]);
     }
 }
 

@@ -41,11 +41,12 @@
                     <p class="text-muted">Download data from each table as CSV files for backup purposes.</p>
                     
                     <!-- Download All Button -->
-                    <!-- <div class="mb-4">
+                    <div class="mb-4">
                         <a href="{{ route('backup.all') }}" class="btn btn-success btn-lg">
                             <i class="bi bi-download"></i> Download All Tables (ZIP)
                         </a>
-                    </div> -->
+                        <p class="text-muted mt-2 mb-0"><small>Download all database tables in a single ZIP file for complete backup.</small></p>
+                    </div>
 
                     <hr>
 

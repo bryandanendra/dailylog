@@ -4,22 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employee;
+use App\Models\User;
 use App\Models\Division;
 use App\Models\SubDivision;
 use App\Models\Role;
 use App\Models\Position;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
     public function index()
     {
+        // Check if user is admin
+        $user = Auth::user();
+        if (!$user || !$user->is_admin) {
+            abort(403, 'Unauthorized access. Only administrators can access this page.');
+        }
+        
         return view('employee.index');
     }
 
     public function getData(Request $request)
     {
+        // Check if user is admin
+        $user = Auth::user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+        
         $params = json_decode($request->get('data'), true);
         
         $page = $params['page'] ?? 1;
@@ -126,6 +140,12 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        // Check if user is admin
+        $user = Auth::user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+        
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|email|unique:employees,username',
@@ -161,11 +181,32 @@ class EmployeeController extends Controller
             'is_approved' => false // Employee baru belum diapprove
         ]);
 
+        // Sinkronisasi ke User jika user dengan email yang sama sudah ada
+        $user = User::where('email', $employee->email)->first();
+        if ($user) {
+            $user->update([
+                'is_admin' => $employee->is_admin,
+                'can_approve' => $employee->can_approve,
+                'cutoff_exception' => $employee->cutoff_exception,
+                'division_id' => $employee->division_id,
+                'sub_division_id' => $employee->sub_division_id,
+                'role_id' => $employee->role_id,
+                'position_id' => $employee->position_id,
+            ]);
+            $employee->update(['user_id' => $user->id]);
+        }
+
         return response()->json(['success' => true, 'employee' => $employee]);
     }
 
     public function update(Request $request, $id)
     {
+        // Check if user is admin
+        $user = Auth::user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+        
         $employee = Employee::findOrFail($id);
         
         $validatedData = $request->validate([
@@ -206,6 +247,41 @@ class EmployeeController extends Controller
         }
 
         $employee->update($updateData);
+
+        // Sinkronisasi akses ke User jika employee memiliki user_id
+        if ($employee->user_id) {
+            $user = User::find($employee->user_id);
+            if ($user) {
+                $user->update([
+                    'is_admin' => $employee->is_admin,
+                    'can_approve' => $employee->can_approve,
+                    'cutoff_exception' => $employee->cutoff_exception,
+                    'division_id' => $employee->division_id,
+                    'sub_division_id' => $employee->sub_division_id,
+                    'role_id' => $employee->role_id,
+                    'position_id' => $employee->position_id,
+                ]);
+            }
+        } else {
+            // Jika tidak ada user_id, cari user berdasarkan email
+            $user = User::where('email', $employee->email)->first();
+            if ($user) {
+                $user->update([
+                    'is_admin' => $employee->is_admin,
+                    'can_approve' => $employee->can_approve,
+                    'cutoff_exception' => $employee->cutoff_exception,
+                    'division_id' => $employee->division_id,
+                    'sub_division_id' => $employee->sub_division_id,
+                    'role_id' => $employee->role_id,
+                    'position_id' => $employee->position_id,
+                ]);
+                
+                // Update user_id di employee jika belum ada
+                if (!$employee->user_id) {
+                    $employee->update(['user_id' => $user->id]);
+                }
+            }
+        }
 
         return response()->json(['success' => true, 'employee' => $employee]);
     }
@@ -260,12 +336,53 @@ class EmployeeController extends Controller
     
     public function approveRegistration(Request $request)
     {
+        // Check if user is admin
+        $user = Auth::user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+        
         $id = $request->get('id');
         $employee = Employee::findOrFail($id);
         
         $employee->update([
             'is_approved' => true
         ]);
+
+        // Sinkronisasi akses ke User setelah approval
+        if ($employee->user_id) {
+            $userModel = User::find($employee->user_id);
+            if ($userModel) {
+                $userModel->update([
+                    'is_admin' => $employee->is_admin,
+                    'can_approve' => $employee->can_approve,
+                    'cutoff_exception' => $employee->cutoff_exception,
+                    'division_id' => $employee->division_id,
+                    'sub_division_id' => $employee->sub_division_id,
+                    'role_id' => $employee->role_id,
+                    'position_id' => $employee->position_id,
+                ]);
+            }
+        } else {
+            // Jika tidak ada user_id, cari user berdasarkan email
+            $userModel = User::where('email', $employee->email)->first();
+            if ($userModel) {
+                $userModel->update([
+                    'is_admin' => $employee->is_admin,
+                    'can_approve' => $employee->can_approve,
+                    'cutoff_exception' => $employee->cutoff_exception,
+                    'division_id' => $employee->division_id,
+                    'sub_division_id' => $employee->sub_division_id,
+                    'role_id' => $employee->role_id,
+                    'position_id' => $employee->position_id,
+                ]);
+                
+                // Update user_id di employee jika belum ada
+                if (!$employee->user_id) {
+                    $employee->update(['user_id' => $userModel->id]);
+                }
+            }
+        }
 
         return response()->json(['success' => true, 'message' => 'Employee registration approved successfully']);
     }

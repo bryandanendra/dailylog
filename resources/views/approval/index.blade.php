@@ -173,7 +173,7 @@
     <div class="row">
         <div class="col-12">
         <div class="pagetitle">
-                    <h1 class="text-capitalize">Employee</h1>   </div>
+                    <h1 class="text-capitalize">Approval</h1>   </div>
                 </div> 
 
 <nav aria-label="breadcrumb">

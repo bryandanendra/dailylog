@@ -24,12 +24,20 @@ class ChangePasswordController extends Controller
 
         // Check if current password is correct
         if (!Hash::check($request->current_password, $user->password)) {
+            // Forget any previous success messages
+            session()->forget('success');
             return redirect()->back()->with('error', 'Current password is incorrect!');
         }
 
         // Update password
         $user->password = Hash::make($request->new_password);
         $user->save();
+
+        // Forget any previous error messages
+        session()->forget('error');
+        
+        // Log out other devices (optional security measure)
+        Auth::logoutOtherDevices($request->new_password);
 
         return redirect()->back()->with('success', 'Password changed successfully!');
     }

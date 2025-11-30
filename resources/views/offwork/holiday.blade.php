@@ -79,6 +79,37 @@
     </div>
 </section>
 
+<style>
+    .search-bar {
+        min-width: 300px;
+    }
+    
+    .search-data {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        overflow: hidden;
+    }
+    
+    .search-data input {
+        border: none;
+        padding: 0.375rem 0.75rem;
+        outline: none;
+        flex: 1;
+    }
+    
+    .search-data button {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 0.375rem 0.75rem;
+        cursor: pointer;
+    }
+    
+    .search-data button:hover {
+        background: #0b5ed7;
+    }
+</style>
+
 <!-- Add/Edit Modal -->
 <div class="modal fade" id="holidayModal" tabindex="-1" aria-labelledby="holidayModalLabel" aria-hidden="true">
     <div class="modal-dialog">

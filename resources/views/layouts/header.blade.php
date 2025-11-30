@@ -4,12 +4,7 @@
             <button class="btn btn-link text-white me-3" id="sidebar-hide-btn" title="Hide Sidebar">
                 <i class="bi bi-chevron-left"></i>
             </button>
-            <a href="/" class="logo d-flex align-items-center">
-                <img src="/images/logo.png" alt="">
-                <span class="d-lg-block">dlogapp</span>
-            </a>
         </div>
-        <i class="bi bi-list toggle-sidebar-btn" id="sidebar-toggle" title="Collapse Sidebar"></i>
     </div>
     <div class="search-bar">
         <form class="search-form d-flex align-items-center" method="POST" action="#">

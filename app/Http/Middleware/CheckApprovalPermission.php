@@ -16,7 +16,11 @@ class CheckApprovalPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::user()->can_approve) {
+        $user = Auth::user();
+        $employee = \App\Models\Employee::where('email', $user->email)->first();
+        $canApprove = $employee ? $employee->can_approve : $user->can_approve;
+        
+        if (!$canApprove) {
             abort(403, 'Access denied. You do not have approval permissions.');
         }
 

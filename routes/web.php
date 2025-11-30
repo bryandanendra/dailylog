@@ -58,12 +58,16 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/log/{id}', [App\Http\Controllers\LogController::class, 'destroy'])->name('log.destroy');
     Route::get('/log/date/{date}', [App\Http\Controllers\LogController::class, 'getLogsByDate'])->name('log.by-date');
     Route::get('/log/autocomplete', [App\Http\Controllers\LogController::class, 'getAutocompleteData'])->name('log.autocomplete');
+    Route::get('/log/checkApproval', [App\Http\Controllers\LogController::class, 'checkApproval'])->name('log.check-approval');
     
     // Change Password Route
     Route::post('/change-password', [ChangePasswordController::class, 'changePassword'])->name('change-password');
     
     // Reports Routes
     Route::prefix('report')->group(function () {
+        // Debug route (remove in production or add auth check)
+        Route::get('/debug', [App\Http\Controllers\ReportDebugController::class, 'debug'])->name('report.debug');
+        
         Route::get('/monthly', [MonthlyReportController::class, 'index'])->name('report.monthly');
         Route::get('/monthly/setdate', [MonthlyReportController::class, 'setDate'])->name('report.monthly.setdate');
         Route::get('/monthly/getcategories', [MonthlyReportController::class, 'getCategories'])->name('report.monthly.getcategories');
@@ -89,11 +93,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/category/getData', [App\Http\Controllers\CategoryReportController::class, 'getData'])->name('report.category.getdata');
         Route::get('/category/print', [App\Http\Controllers\CategoryReportController::class, 'print'])->name('report.category.print');
         
+        Route::get('/tma', [App\Http\Controllers\TMAReportController::class, 'index'])->name('report.tma');
+        Route::get('/tma/getData', [App\Http\Controllers\TMAReportController::class, 'getData'])->name('report.tma.getdata');
+        Route::get('/tma/getHoliday', [App\Http\Controllers\TMAReportController::class, 'getHoliday'])->name('report.tma.getholiday');
+        Route::get('/tma/print', [App\Http\Controllers\TMAReportController::class, 'print'])->name('report.tma.print');
+        
     });
     
     // Approval Routes
     Route::get('/approved', function () {
-        if (!Auth::user()->can_approve) {
+        $user = Auth::user();
+        $employee = \App\Models\Employee::where('email', $user->email)->first();
+        $canApprove = $employee ? $employee->can_approve : $user->can_approve;
+        
+        if (!$canApprove) {
             abort(403, 'Access denied. You do not have approval permissions.');
         }
         return view('approval.index');
@@ -108,6 +121,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/getUnapprovedLogs', [App\Http\Controllers\ApprovalController::class, 'getUnapprovedLogs']);
         Route::get('/leavesave', [App\Http\Controllers\ApprovalController::class, 'leavesave']);
         Route::get('/select', [App\Http\Controllers\ApprovalController::class, 'select']);
+        Route::get('/debug', [App\Http\Controllers\ApprovalController::class, 'debug']);
     });
     
     // Table Management Routes

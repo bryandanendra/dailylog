@@ -14,16 +14,16 @@ use App\Models\WorkStatus;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class SPDRReportController extends Controller
+class TMAReportController extends Controller
 {
     public function index()
     {
         // Check report access based on role
-        if (!hasReportAccess('spdr')) {
+        if (!hasReportAccess('tma')) {
             abort(403, 'Access denied. You do not have permission to access this report.');
         }
         
-        return view('reports.spdr');
+        return view('reports.tma');
     }
 
     public function getData(Request $request)
@@ -34,15 +34,15 @@ class SPDRReportController extends Controller
             return response()->json([]);
         }
 
-        // Get SPDR role ID
-        $spdrRole = \App\Models\Role::where('title', 'SPDR Estimating')->first();
-        if (!$spdrRole) {
+        // Get TMA role ID
+        $tmaRole = \App\Models\Role::where('title', 'TMA Estimating')->first();
+        if (!$tmaRole) {
             return response()->json([]);
         }
 
-        // Get only SPDR role employees with their logs for the specific date
+        // Get only TMA role employees with their logs for the specific date
         $employees = Employee::with(['user', 'division', 'subDivision', 'role', 'position'])
-            ->where('role_id', $spdrRole->id) // Only SPDR role
+            ->where('role_id', $tmaRole->id) // Only TMA role
             ->whereHas('logs', function($query) use ($date) {
                 $query->where('date', $date);
             })
@@ -50,9 +50,9 @@ class SPDRReportController extends Controller
 
         $result = [];
 
-        // Get SPDR category ID
-        $spdrCategory = Category::where('title', 'SPDR')->first();
-        if (!$spdrCategory) {
+        // Get TMA category ID
+        $tmaCategory = Category::where('title', 'TMA')->first();
+        if (!$tmaCategory) {
             return response()->json([]);
         }
 
@@ -60,14 +60,14 @@ class SPDRReportController extends Controller
             $logs = Log::with(['category', 'task', 'builder', 'dweling', 'status'])
                 ->where('employee_id', $employee->id)
                 ->where('date', $date)
-                ->where('category_id', $spdrCategory->id) // Only SPDR category logs
+                ->where('category_id', $tmaCategory->id) // Only TMA category logs
                 ->get();
 
             $leaveRecords = []; // You can implement leave logic here if needed
 
             $result[] = [
                 'employee_id' => $employee->id,
-                'title' => $employee->user->name,
+                'title' => $employee->user ? $employee->user->name : ($employee->name ?? 'N/A'),
                 'division' => $employee->division->title ?? 'N/A',
                 'subdivision' => $employee->subDivision->title ?? 'N/A',
                 'role' => $employee->role->title ?? 'N/A',
@@ -115,15 +115,15 @@ class SPDRReportController extends Controller
             return response()->json(['error' => 'Date is required'], 400);
         }
 
-        // Get SPDR data for the date
-        $spdrData = $this->getSPDRDataForDate($date);
+        // Get TMA data for the date
+        $tmaData = $this->getTMADataForDate($date);
         $leaveList = $this->getLeaveListForDate($date);
         
         // Generate PDF
-        $pdf = Pdf::loadView('reports.spdr-pdf', [
+        $pdf = Pdf::loadView('reports.tma-pdf', [
             'date' => $date,
             'holiday' => $holiday,
-            'spdrData' => $spdrData,
+            'tmaData' => $tmaData,
             'leaveList' => $leaveList
         ]);
         
@@ -136,7 +136,7 @@ class SPDRReportController extends Controller
         ]);
         
         // Generate filename
-        $filename = 'SPDR_Report_' . Carbon::parse($date)->format('Y-m-d') . '.pdf';
+        $filename = 'TMA_Report_' . Carbon::parse($date)->format('Y-m-d') . '.pdf';
         
         // Save PDF to storage
         $pdfPath = storage_path('app/public/reports/' . $filename);
@@ -156,26 +156,26 @@ class SPDRReportController extends Controller
     }
     
     
-    private function getSPDRDataForDate($date)
+    private function getTMADataForDate($date)
     {
-        // Get SPDR category ID first
-        $spdrCategory = Category::where('title', 'SPDR')->first();
-        if (!$spdrCategory) {
+        // Get TMA category ID first
+        $tmaCategory = Category::where('title', 'TMA')->first();
+        if (!$tmaCategory) {
             return [];
         }
 
-        // Get SPDR role ID
-        $spdrRole = \App\Models\Role::where('title', 'SPDR Estimating')->first();
-        if (!$spdrRole) {
+        // Get TMA role ID
+        $tmaRole = \App\Models\Role::where('title', 'TMA Estimating')->first();
+        if (!$tmaRole) {
             return [];
         }
 
-        // Get only SPDR role employees with SPDR logs for the specific date
+        // Get only TMA role employees with TMA logs for the specific date
         $employees = Employee::with(['user', 'division', 'subDivision', 'role', 'position'])
-            ->where('role_id', $spdrRole->id) // Only SPDR role
-            ->whereHas('logs', function($query) use ($date, $spdrCategory) {
+            ->where('role_id', $tmaRole->id) // Only TMA role
+            ->whereHas('logs', function($query) use ($date, $tmaCategory) {
                 $query->where('date', $date)
-                      ->where('category_id', $spdrCategory->id);
+                      ->where('category_id', $tmaCategory->id);
             })
             ->get();
 
@@ -185,14 +185,14 @@ class SPDRReportController extends Controller
             $logs = Log::with(['category', 'task', 'builder', 'dweling', 'status'])
                 ->where('employee_id', $employee->id)
                 ->where('date', $date)
-                ->where('category_id', $spdrCategory->id) // Only SPDR category logs
+                ->where('category_id', $tmaCategory->id) // Only TMA category logs
                 ->get();
 
             $totalMinutes = $logs->sum('duration');
             $totalHours = $totalMinutes / 60;
 
             $result[] = [
-                'name' => $employee->user->name,
+                'name' => $employee->user ? $employee->user->name : $employee->name,
                 'division' => $employee->division->title ?? 'N/A',
                 'sub_division' => $employee->subDivision->title ?? 'N/A',
                 'role' => $employee->role->title ?? 'N/A',
@@ -221,16 +221,16 @@ class SPDRReportController extends Controller
     
     private function getLeaveListForDate($date)
     {
-        // Get SPDR role ID
-        $spdrRole = \App\Models\Role::where('title', 'SPDR Estimating')->first();
-        if (!$spdrRole) {
+        // Get TMA role ID
+        $tmaRole = \App\Models\Role::where('title', 'TMA Estimating')->first();
+        if (!$tmaRole) {
             return [];
         }
 
-        // Get SPDR role employees who are on leave (no logs for the date)
+        // Get TMA role employees who are on leave (no logs for the date)
         $employeesOnLeave = Employee::with(['user', 'division', 'subDivision', 'role', 'position'])
-            ->where('role_id', $spdrRole->id) // Only SPDR role
-            ->where('archive', null)
+            ->where('role_id', $tmaRole->id) // Only TMA role
+            ->where('archive', 0)
             ->whereDoesntHave('logs', function($query) use ($date) {
                 $query->where('date', $date);
             })
@@ -240,7 +240,7 @@ class SPDRReportController extends Controller
 
         foreach ($employeesOnLeave as $employee) {
             $leaveList[] = [
-                'name' => $employee->user->name,
+                'name' => $employee->user ? $employee->user->name : $employee->name,
                 'division' => $employee->division->title ?? 'N/A',
                 'sub_division' => $employee->subDivision->title ?? 'N/A',
                 'role' => $employee->role->title ?? 'N/A',
@@ -252,3 +252,4 @@ class SPDRReportController extends Controller
         return $leaveList;
     }
 }
+

@@ -14,6 +14,11 @@ class MonthlyReportController extends Controller
 {
     public function index()
     {
+        // Check report access based on role
+        if (!hasReportAccess('monthly')) {
+            abort(403, 'Access denied. You do not have permission to access this report.');
+        }
+        
         return view('reports.monthly');
     }
 

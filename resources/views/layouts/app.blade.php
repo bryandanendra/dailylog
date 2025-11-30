@@ -19,7 +19,16 @@
             transition: all 0.3s;
         }
         .sidebar.collapsed {
-            width: 60px;
+            width: 50px;
+        }
+        .sidebar.collapsed nav {
+            display: none;
+        }
+        .sidebar.collapsed .sidebar-toggle-btn {
+            display: flex !important;
+            justify-content: center;
+            margin: 0;
+            padding: 12px 0;
         }
         .sidebar.hidden {
             transform: translateX(-100%);
@@ -62,7 +71,7 @@
             transition: all 0.3s;
         }
         .main-content.expanded {
-            margin-left: 60px;
+            margin-left: 50px;
         }
         .main-content.sidebar-hidden {
             margin-left: 0;
@@ -173,9 +182,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1050;
             position: absolute !important;
-            top: calc(100% + 4px) !important;
+            top: 100% !important;
             right: 0 !important;
-            margin-top: 0 !important;
+            margin-top: -8px !important;
         }
         .dropdown-menu.notifications:not(.show) {
             display: none !important;
@@ -215,9 +224,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1050;
             position: absolute !important;
-            top: calc(100% + 4px) !important;
+            top: 100% !important;
             right: 0 !important;
-            margin-top: 0 !important;
+            margin-top: -4px !important;
         }
         .dropdown-menu.profile:not(.show) {
             display: none !important;
@@ -285,11 +294,10 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="p-2">
-            <div class="d-flex align-items-center mb-3">
-                <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                    <strong>D</strong>
-                </div>
-                <span class="ms-2 fw-bold" id="logo-text" style="font-size: 0.9rem;">DLOGAPP</span>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <button class="btn btn-link p-0 text-primary sidebar-toggle-btn" id="sidebar-toggle-inner" title="Toggle Sidebar" style="font-size: 1.3rem; line-height: 1;">
+                    <i class="bi bi-list"></i>
+                </button>
             </div>
         </div>
         
@@ -312,27 +320,46 @@
                 </a>
                 <div class="collapse" id="reports-nav">
                     <div class="nav flex-column ms-3">
+                        @if(hasReportAccess('monthly'))
                         <a class="nav-link" href="{{ route('report.monthly') }}">
                             <i class="bi bi-circle-fill"></i>
                             <span class="nav-text">Monthly Report</span>
                         </a>
+                        @endif
+                        @if(hasReportAccess('bi'))
                         <a class="nav-link" href="{{ route('report.bi') }}">
                             <i class="bi bi-circle-fill"></i>
                             <span class="nav-text">BI Report</span>
                         </a>
+                        @endif
+                        @if(hasReportAccess('spdr'))
                         <a class="nav-link" href="{{ route('report.spdr') }}">
                             <i class="bi bi-circle-fill"></i>
                             <span class="nav-text">SPDR Report</span>
                         </a>
+                        @endif
+                        @if(hasReportAccess('category'))
                         <a class="nav-link" href="{{ route('report.category') }}">
                             <i class="bi bi-circle-fill"></i>
                             <span class="nav-text">Category Report</span>
                         </a>
+                        @endif
+                        @if(hasReportAccess('tma'))
+                        <a class="nav-link" href="{{ route('report.tma') }}">
+                            <i class="bi bi-circle-fill"></i>
+                            <span class="nav-text">TMA Report</span>
+                        </a>
+                        @endif
                     </div>
                 </div>
             </div>
             
-            @if(Auth::user()->can_approve)
+            @php
+                $user = Auth::user();
+                $employee = \App\Models\Employee::where('email', $user->email)->first();
+                $canApprove = $employee ? $employee->can_approve : $user->can_approve;
+            @endphp
+            @if($canApprove)
             <a class="nav-link {{ request()->is('approved*') ? 'active' : '' }}" href="{{ route('approval.index') }}">
                 <i class="bi bi-check-square"></i>
                 <span class="nav-text">Approval</span>
@@ -363,10 +390,12 @@
                 </div>
             </div>
             
+            @if(Auth::user()->is_admin)
             <a class="nav-link {{ request()->is('employee*') ? 'active' : '' }}" href="{{ route('employee.index') }}">
                 <i class="bi bi-person-square"></i>
                 <span class="nav-text">Employees</span>
             </a>
+            @endif
             
             <a class="nav-link {{ request()->is('backup*') ? 'active' : '' }}" href="{{ route('backup.index') }}">
                 <i class="bi bi-database"></i>
@@ -466,43 +495,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Sidebar toggle functionality
-        document.getElementById('sidebar-toggle').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const logoText = document.getElementById('logo-text');
-            const navTexts = document.querySelectorAll('.nav-text');
-            
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                logoText.style.display = 'none';
-                navTexts.forEach(text => text.style.display = 'none');
-            } else {
-                logoText.style.display = 'block';
-                navTexts.forEach(text => text.style.display = 'inline');
-            }
-        });
-
-        // Toggle sidebar button functionality
-        document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const logoText = document.getElementById('logo-text');
-            const navTexts = document.querySelectorAll('.nav-text');
-            
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                logoText.style.display = 'none';
-                navTexts.forEach(text => text.style.display = 'none');
-            } else {
-                logoText.style.display = 'block';
-                navTexts.forEach(text => text.style.display = 'inline');
-            }
-        });
+        // Inner sidebar toggle button (inside sidebar)
+        const innerToggle = document.getElementById('sidebar-toggle-inner');
+        if (innerToggle) {
+            innerToggle.addEventListener('click', function() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('main-content');
+                
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+        }
 
         // Hide/Show sidebar button functionality
         document.addEventListener('DOMContentLoaded', function() {
