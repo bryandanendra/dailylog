@@ -411,13 +411,24 @@
 
     const removeRow = (id) => {
         if(confirm('Are you sure? this data will be remove')) {
-            fetch(`/employee/remove?id=${id}`).then((response) => {
+            fetch(`/employee/remove?id=${id}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
                 return response.json();
-            }).then((data) => {
-                setTimeout(() => {
-                    alert('Data has been removed');
-                    getData()
-                }, 500);
+            })
+            .then((data) => {
+                if (data.success) {
+                    alert(data.message || 'Data has been removed');
+                    getData();
+                } else {
+                    alert('Failed: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting');
             });
         }
     };
@@ -463,7 +474,7 @@
     };
 
     const resetpwd = (id) => {
-        let text, newpass = prompt("Please enter your password:", "gmc117");
+        let text, newpass = prompt("Please enter new password:", "asc123");
         if (newpass == null || newpass == "") {
             alert('New password not change, please try again');
         } else {
@@ -968,7 +979,20 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
+            .then(async response => {
+                if (response.status === 422) {
+                    const result = await response.json();
+                    let errorMessage = 'Validation Error:\n';
+                    if (result.errors) {
+                        Object.keys(result.errors).forEach(key => {
+                            errorMessage += `- ${result.errors[key][0]}\n`;
+                        });
+                    } else {
+                        errorMessage += result.message || 'Unknown validation error';
+                    }
+                    throw new Error(errorMessage);
+                }
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

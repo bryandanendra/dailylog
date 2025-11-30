@@ -49,7 +49,6 @@ class PositionController extends Controller
                 return [
                     'id' => $position->id,
                     'title' => $position->title,
-                    'level' => $position->level,
                     'description' => $position->description,
                 ];
             })
@@ -62,14 +61,12 @@ class PositionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'level' => 'required|integer|min:1|max:10',
             'description' => 'nullable|string|max:500',
         ]);
 
         try {
             $position = Position::create([
                 'title' => $request->title,
-                'level' => $request->level,
                 'description' => $request->description,
             ]);
 
@@ -83,7 +80,6 @@ class PositionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'level' => 'required|integer|min:1|max:10',
             'description' => 'nullable|string|max:500',
         ]);
 
@@ -91,7 +87,6 @@ class PositionController extends Controller
             $position = Position::findOrFail($id);
             $position->update([
                 'title' => $request->title,
-                'level' => $request->level,
                 'description' => $request->description,
             ]);
 

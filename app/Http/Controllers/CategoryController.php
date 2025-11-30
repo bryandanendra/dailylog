@@ -102,7 +102,7 @@ class CategoryController extends Controller
             $category = Category::findOrFail($id);
             
             // Check if category is being used
-            $logCount = DB::table('logs')->where('category', $category->title)->count();
+            $logCount = DB::table('logs')->where('category_id', $category->id)->count();
             if ($logCount > 0) {
                 return response()->json(['success' => false, 'message' => 'Cannot delete category that is being used in logs'], 400);
             }

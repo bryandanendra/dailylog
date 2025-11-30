@@ -4,8 +4,11 @@
 
 Setelah menjalankan seeder, akun admin berikut akan otomatis dibuat:
 
-**Email**: `admin@dailylog.com`  
+**Username**: `admin` ← **GUNAKAN INI UNTUK LOGIN!**  
 **Password**: `admin123`
+
+> ⚠️ **PENTING**: Login menggunakan **USERNAME**, bukan email!  
+> Email admin: `admin@dailylog.com` (untuk referensi saja)
 
 **Permissions**:
 - ✅ `is_admin`: true (Full admin access)

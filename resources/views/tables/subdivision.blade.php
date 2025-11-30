@@ -41,13 +41,14 @@
                           <tr>
                             <th style="width: 80px;">Action</th>
                             <th style="width: 50px;">#</th>
+                            <th>Division</th>
                             <th>Sub Division Name</th>
                             <th style="width: 200px;">Description</th>
                           </tr>
                         </thead>
                         <tbody id="table-body">
                             <tr>
-                                <td colspan="4" class="text-center">Loading...</td>
+                                <td colspan="5" class="text-center">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -84,6 +85,15 @@
             <div class="modal-body">
                 <form id="subdivisionForm">
                     <input type="hidden" id="subdivision-id">
+                    <div class="mb-3">
+                        <label for="subdivision-division" class="form-label">Division <span class="text-danger">*</span></label>
+                        <select class="form-select" id="subdivision-division" required>
+                            <option value="">Select Division</option>
+                            @foreach($divisions as $division)
+                                <option value="{{ $division->id }}">{{ $division->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="subdivision-title" class="form-label">Sub Division Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="subdivision-title" required>
@@ -159,7 +169,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('table-body').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>';
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading data</td></tr>';
             });
     }
 
@@ -167,14 +177,14 @@
     function renderTable(subdivisions) {
         const tbody = document.getElementById('table-body');
         if (!subdivisions || subdivisions.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No data found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No data found</td></tr>';
             return;
         }
 
         tbody.innerHTML = subdivisions.map((div, index) => `
             <tr>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-warning btn-edit" data-id="${div.id}" data-title="${div.title}" data-description="${div.description || ''}">
+                    <button class="btn btn-sm btn-warning btn-edit" data-id="${div.id}" data-title="${div.title}" data-description="${div.description || ''}" data-division-id="${div.division_id}">
                         <i class="bi bi-pencil"></i>
                     </button>
                     <button class="btn btn-sm btn-danger btn-delete" data-id="${div.id}">
@@ -182,6 +192,7 @@
                     </button>
                 </td>
                 <td class="text-center">${(currentPage - 1) * currentLimit + index + 1}</td>
+                <td>${div.division_name || '-'}</td>
                 <td>${div.title}</td>
                 <td>${div.description || '-'}</td>
             </tr>
@@ -190,7 +201,7 @@
         // Add event listeners
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', function() {
-                editSubdivision(this.dataset.id, this.dataset.title, this.dataset.description);
+                editSubdivision(this.dataset.id, this.dataset.title, this.dataset.description, this.dataset.divisionId);
             });
         });
 
@@ -293,9 +304,10 @@
     });
 
     // Edit subdivision
-    function editSubdivision(id, title, description) {
+    function editSubdivision(id, title, description, divisionId) {
         document.getElementById('subdivisionModalLabel').textContent = 'Edit Sub Division';
         document.getElementById('subdivision-id').value = id;
+        document.getElementById('subdivision-division').value = divisionId || '';
         document.getElementById('subdivision-title').value = title;
         document.getElementById('subdivision-description').value = description;
         new bootstrap.Modal(document.getElementById('subdivisionModal')).show();
@@ -304,8 +316,14 @@
     // Save subdivision
     document.getElementById('btn-save').addEventListener('click', function() {
         const id = document.getElementById('subdivision-id').value;
+        const divisionId = document.getElementById('subdivision-division').value;
         const title = document.getElementById('subdivision-title').value;
         const description = document.getElementById('subdivision-description').value;
+
+        if (!divisionId) {
+            alert('Division is required');
+            return;
+        }
 
         if (!title) {
             alert('Sub Division name is required');
@@ -321,7 +339,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify({ title, description })
+            body: JSON.stringify({ division_id: divisionId, title, description })
         })
         .then(response => response.json())
         .then(data => {

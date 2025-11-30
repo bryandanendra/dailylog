@@ -15,19 +15,20 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            DivisionSeeder::class,
-            SubDivisionSeeder::class,
-            RoleSeeder::class,
-            PositionSeeder::class,
-            CategorySeeder::class,
-            TaskSeeder::class,
-            BuilderSeeder::class,
-            DwelingSeeder::class,
-            StatusSeeder::class,
-            WorkStatusSeeder::class,
-            TimeCutoffSeeder::class,
-            EmployeeSeeder::class,
-            LogSeeder::class,
+            // Disabled CSV-dependent seeders - use SQL import instead
+            // DivisionSeeder::class,
+            // SubDivisionSeeder::class,
+            // RoleSeeder::class,
+            // PositionSeeder::class,
+            // CategorySeeder::class,
+            // TaskSeeder::class,
+            // BuilderSeeder::class,
+            // DwelingSeeder::class,
+            // StatusSeeder::class,
+            // WorkStatusSeeder::class,
+            // TimeCutoffSeeder::class,
+            // EmployeeSeeder::class,
+            // LogSeeder::class,
         ]);
     }
 }

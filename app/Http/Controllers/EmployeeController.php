@@ -172,7 +172,7 @@ class EmployeeController extends Controller
             'sub_division_id' => $validatedData['sub_division_id'],
             'role_id' => $validatedData['role_id'],
             'position_id' => $validatedData['position_id'],
-            'superior_id' => $request->superior_id ?? null,
+            'superior_id' => $request->superior_id ?: null,
             'description' => $request->description ?? null,
             'is_admin' => $request->is_admin ?? false,
             'can_approve' => $request->can_approve ?? false,
@@ -233,7 +233,7 @@ class EmployeeController extends Controller
             'sub_division_id' => $validatedData['sub_division_id'],
             'role_id' => $validatedData['role_id'],
             'position_id' => $validatedData['position_id'],
-            'superior_id' => $request->superior_id ?? $employee->superior_id,
+            'superior_id' => $request->has('superior_id') ? ($request->superior_id ?: null) : $employee->superior_id,
             'description' => $request->description ?? $employee->description,
             'is_admin' => $request->is_admin ?? $employee->is_admin,
             'can_approve' => $request->can_approve ?? $employee->can_approve,
@@ -253,20 +253,8 @@ class EmployeeController extends Controller
             $user = User::find($employee->user_id);
             if ($user) {
                 $user->update([
-                    'is_admin' => $employee->is_admin,
-                    'can_approve' => $employee->can_approve,
-                    'cutoff_exception' => $employee->cutoff_exception,
-                    'division_id' => $employee->division_id,
-                    'sub_division_id' => $employee->sub_division_id,
-                    'role_id' => $employee->role_id,
-                    'position_id' => $employee->position_id,
-                ]);
-            }
-        } else {
-            // Jika tidak ada user_id, cari user berdasarkan email
-            $user = User::where('email', $employee->email)->first();
-            if ($user) {
-                $user->update([
+                    'name' => $employee->name,
+                    'email' => $employee->email,
                     'is_admin' => $employee->is_admin,
                     'can_approve' => $employee->can_approve,
                     'cutoff_exception' => $employee->cutoff_exception,
@@ -276,8 +264,51 @@ class EmployeeController extends Controller
                     'position_id' => $employee->position_id,
                 ]);
                 
+                if ($request->password) {
+                    $user->update(['password' => Hash::make($request->password)]);
+                }
+            }
+        } else {
+            // Jika tidak ada user_id, cari user berdasarkan email
+            $user = User::where('email', $employee->email)->first();
+            if ($user) {
+                $user->update([
+                    'name' => $employee->name,
+                    'email' => $employee->email,
+                    'is_admin' => $employee->is_admin,
+                    'can_approve' => $employee->can_approve,
+                    'cutoff_exception' => $employee->cutoff_exception,
+                    'division_id' => $employee->division_id,
+                    'sub_division_id' => $employee->sub_division_id,
+                    'role_id' => $employee->role_id,
+                    'position_id' => $employee->position_id,
+                ]);
+                
+                if ($request->password) {
+                    $user->update(['password' => Hash::make($request->password)]);
+                }
+                
                 // Update user_id di employee jika belum ada
                 if (!$employee->user_id) {
+                    $employee->update(['user_id' => $user->id]);
+                }
+            } else {
+                // Create new user if not exists (only if approved)
+                if ($employee->is_approved) {
+                    $user = User::create([
+                        'name' => $employee->name,
+                        'username' => $employee->username, // Added username
+                        'email' => $employee->email,
+                        'password' => $employee->password, // Use existing hashed password
+                        'join_date' => $employee->join_date, // Added join_date
+                        'is_admin' => $employee->is_admin,
+                        'can_approve' => $employee->can_approve,
+                        'cutoff_exception' => $employee->cutoff_exception,
+                        'division_id' => $employee->division_id,
+                        'sub_division_id' => $employee->sub_division_id,
+                        'role_id' => $employee->role_id,
+                        'position_id' => $employee->position_id,
+                    ]);
                     $employee->update(['user_id' => $user->id]);
                 }
             }
@@ -288,11 +319,33 @@ class EmployeeController extends Controller
 
     public function destroy(Request $request)
     {
-        $id = $request->get('id');
-        $employee = Employee::findOrFail($id);
-        $employee->delete();
+        try {
+            $id = $request->get('id');
+            if (!$id) {
+                return response()->json(['success' => false, 'message' => 'ID is required']);
+            }
 
-        return response()->json(['success' => true]);
+            $employee = Employee::find($id);
+            if (!$employee) {
+                return response()->json(['success' => false, 'message' => 'Employee not found']);
+            }
+            
+            if ($employee->archive) {
+                // If already archived, delete permanently
+                try {
+                    $employee->delete();
+                    return response()->json(['success' => true, 'message' => 'Employee permanently deleted']);
+                } catch (\Exception $e) {
+                    return response()->json(['success' => false, 'message' => 'Cannot delete employee because they have related data: ' . $e->getMessage()]);
+                }
+            } else {
+                // Archive the employee
+                $employee->update(['archive' => true]);
+                return response()->json(['success' => true, 'message' => 'Employee archived successfully']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Server Error: ' . $e->getMessage()]);
+        }
     }
 
     public function show($id)
@@ -381,6 +434,23 @@ class EmployeeController extends Controller
                 if (!$employee->user_id) {
                     $employee->update(['user_id' => $userModel->id]);
                 }
+            } else {
+                // Create new user
+                $userModel = User::create([
+                    'name' => $employee->name,
+                    'username' => $employee->username, // Added username
+                    'email' => $employee->email,
+                    'password' => $employee->password,
+                    'join_date' => $employee->join_date, // Added join_date
+                    'is_admin' => $employee->is_admin,
+                    'can_approve' => $employee->can_approve,
+                    'cutoff_exception' => $employee->cutoff_exception,
+                    'division_id' => $employee->division_id,
+                    'sub_division_id' => $employee->sub_division_id,
+                    'role_id' => $employee->role_id,
+                    'position_id' => $employee->position_id,
+                ]);
+                $employee->update(['user_id' => $userModel->id]);
             }
         }
 
@@ -410,6 +480,31 @@ class EmployeeController extends Controller
         Employee::whereIn('id', $ids)->update([
             'is_approved' => true
         ]);
+
+        // Create users for approved employees
+        $employees = Employee::whereIn('id', $ids)->get();
+        foreach ($employees as $employee) {
+            if (!$employee->user_id) {
+                $user = User::where('email', $employee->email)->first();
+                if (!$user) {
+                    $user = User::create([
+                        'name' => $employee->name,
+                        'username' => $employee->username, // Added username
+                        'email' => $employee->email,
+                        'password' => $employee->password,
+                        'join_date' => $employee->join_date, // Added join_date
+                        'is_admin' => $employee->is_admin,
+                        'can_approve' => $employee->can_approve,
+                        'cutoff_exception' => $employee->cutoff_exception,
+                        'division_id' => $employee->division_id,
+                        'sub_division_id' => $employee->sub_division_id,
+                        'role_id' => $employee->role_id,
+                        'position_id' => $employee->position_id,
+                    ]);
+                }
+                $employee->update(['user_id' => $user->id]);
+            }
+        }
 
         return response()->json(['success' => true, 'message' => count($ids) . ' employee registrations approved']);
     }

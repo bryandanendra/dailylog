@@ -10,7 +10,18 @@ class SubDivisionController extends Controller
 {
     public function index()
     {
-        return view('tables.subdivision');
+        $divisions = \App\Models\Division::where('archive', false)
+                                        ->orderBy('title')
+                                        ->get(['id', 'title']);
+        return view('tables.subdivision', compact('divisions'));
+    }
+
+    public function getDivisions()
+    {
+        $divisions = \App\Models\Division::where('archive', false)
+                                        ->orderBy('title')
+                                        ->get(['id', 'title']);
+        return response()->json($divisions);
     }
 
     public function getData(Request $request)
@@ -50,6 +61,8 @@ class SubDivisionController extends Controller
                     'id' => $subdivision->id,
                     'title' => $subdivision->title,
                     'description' => $subdivision->description,
+                    'division_id' => $subdivision->division_id,
+                    'division_name' => $subdivision->division ? $subdivision->division->title : '-',
                 ];
             })
         ];
@@ -61,12 +74,14 @@ class SubDivisionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'division_id' => 'required|exists:divisions,id',
             'description' => 'nullable|string|max:500',
         ]);
 
         try {
             $subdivision = SubDivision::create([
                 'title' => $request->title,
+                'division_id' => $request->division_id,
                 'description' => $request->description,
             ]);
 
@@ -80,6 +95,7 @@ class SubDivisionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'division_id' => 'required|exists:divisions,id',
             'description' => 'nullable|string|max:500',
         ]);
 
@@ -87,6 +103,7 @@ class SubDivisionController extends Controller
             $subdivision = SubDivision::findOrFail($id);
             $subdivision->update([
                 'title' => $request->title,
+                'division_id' => $request->division_id,
                 'description' => $request->description,
             ]);
 
