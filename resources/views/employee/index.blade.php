@@ -56,7 +56,7 @@
                             <th draggable="true" style="width: 100px; min-width: 100px;" field="join_date">Join Date</th>
                             <th draggable="true" style="width: 70px; min-width: 70px;" field="administrator">Admin</th>
                             <th draggable="true" style="width: 90px; min-width: 90px;" class="approved" field="approved">Approval</th>
-                            <th draggable="true" style="width: 100px; min-width: 100px;" field="archivereport">Cut Off Exception</th>
+                            <th draggable="true" style="width: 150px; min-width: 150px;" field="archivereport">Cut Off Exception</th>
                             <th draggable="true" style="width: 120px; min-width: 120px;" field="parent_id">Supervisor</th>
                             <th draggable="true" style="width: 120px; min-width: 120px;" field="division_id">Division</th>
                             <th draggable="true" style="width: 120px; min-width: 120px;" field="subdivision_id">Sub Division</th>
@@ -410,32 +410,64 @@
     };
 
     const removeRow = (id) => {
-        console.log('Attempting to remove employee with ID:', id); // Debug ID
-        if(confirm('Are you sure? this data will be remove')) {
-            fetch(`/employee/remove?id=${id}`)
-            .then(response => {
-                console.log('Response status:', response.status); // Debug Status
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(`Server responded with ${response.status}: ${text}`);
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This employee will be archived/deleted!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                fetch(`/employee/remove?id=${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`Server responded with ${response.status}: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Data has been removed.',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        getData();
+                    } else {
+                        Swal.fire({
+                            title: 'Failed!',
+                            text: data.message || 'Unknown error',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error details:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred: ' + error.message,
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
                     });
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log('Response data:', data); // Debug Data
-                if (data.success) {
-                    alert(data.message || 'Data has been removed');
-                    getData();
-                } else {
-                    alert('Failed: ' + (data.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error details:', error);
-                alert('An error occurred: ' + error.message);
-            });
-        }
+                });
+            }
+        });
     };
 
     const getData = (first) => {
@@ -479,72 +511,146 @@
     };
 
     const resetpwd = (id) => {
-        let text, newpass = prompt("Please enter new password:", "asc123");
-        if (newpass == null || newpass == "") {
-            alert('New password not change, please try again');
-        } else {
-            text = newpass;
-            fetch(`/employee/resetpass?id=${id}&newpass=${text}`).then((response) => {
-                return response.json();
-            }).then((data) => {
-                setTimeout(() => {
-                    alert('Password has been change');
-                }, 500);
-            });
-        };
+        Swal.fire({
+            title: 'Enter new password',
+            input: 'text',
+            inputValue: 'asc123',
+            showCancelButton: true,
+            confirmButtonText: 'Change',
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#6c757d',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const text = result.value;
+                fetch(`/employee/resetpass?id=${id}&newpass=${text}`).then((response) => {
+                    return response.json();
+                }).then((data) => {
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'Password has been changed',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }, 500);
+                });
+            } else {
+                Swal.fire({
+                    title: 'Cancelled',
+                    text: 'New password not changed',
+                    icon: 'info',
+                    confirmButtonColor: '#0d6efd'
+                });
+            }
+        });
     };
 
     // Employee Registration Approval Functions
     const approveEmployee = (id) => {
-        if (confirm('Are you sure you want to approve this employee registration?')) {
-            fetch('/employee/approve', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ id: id })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    loadData(); // Reload data
-                } else {
-                    alert('Failed to approve employee: ' + (result.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error approving employee');
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to approve this employee registration?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, approve it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/employee/approve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Approved!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        getData(); // Reload data
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to approve employee: ' + (result.message || 'Unknown error'),
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error approving employee',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
+            }
+        });
     };
 
     const rejectEmployee = (id) => {
-        if (confirm('Are you sure you want to reject this employee registration?')) {
-            fetch('/employee/reject', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ id: id })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    loadData(); // Reload data
-                } else {
-                    alert('Failed to reject employee: ' + (result.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error rejecting employee');
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to reject this employee registration?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, reject it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/employee/reject', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Rejected!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        getData(); // Reload data
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to reject employee: ' + (result.message || 'Unknown error'),
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error rejecting employee',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
+            }
+        });
     };
 
     // Event listeners
@@ -617,65 +723,125 @@
     function bulkApprove() {
         const selectedIds = getSelectedEmployeeIds();
         if (selectedIds.length === 0) {
-            alert('Please select employees to approve');
+            Swal.fire({
+                title: 'Warning',
+                text: 'Please select employees to approve',
+                icon: 'warning',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
-        if (confirm(`Are you sure you want to approve ${selectedIds.length} employee registrations?`)) {
-            fetch('/employee/bulk-approve', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ ids: selectedIds })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    getData(false); // Reload data
-                } else {
-                    alert('Failed to approve employees: ' + (result.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error approving employees');
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You want to approve ${selectedIds.length} employee registrations?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, approve them!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/employee/bulk-approve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ ids: selectedIds })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Approved!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        getData(false); // Reload data
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to approve employees: ' + (result.message || 'Unknown error'),
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error approving employees',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
+            }
+        });
     }
 
     function bulkReject() {
         const selectedIds = getSelectedEmployeeIds();
         if (selectedIds.length === 0) {
-            alert('Please select employees to reject');
+            Swal.fire({
+                title: 'Warning',
+                text: 'Please select employees to reject',
+                icon: 'warning',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
-        if (confirm(`Are you sure you want to reject ${selectedIds.length} employee registrations?`)) {
-            fetch('/employee/bulk-reject', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ ids: selectedIds })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    getData(false); // Reload data
-                } else {
-                    alert('Failed to reject employees: ' + (result.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error rejecting employees');
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You want to reject ${selectedIds.length} employee registrations?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, reject them!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/employee/bulk-reject', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ ids: selectedIds })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Rejected!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        getData(false); // Reload data
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to reject employees: ' + (result.message || 'Unknown error'),
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error rejecting employees',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
+            }
+        });
     }
 
     function getSelectedEmployeeIds() {
@@ -1005,7 +1171,12 @@
             })
             .then(result => {
                 if (result.success) {
-                    alert('Employee saved successfully');
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Employee saved successfully',
+                        icon: 'success',
+                        confirmButtonColor: '#0d6efd'
+                    });
                     bootstrap.Modal.getInstance(document.getElementById('modal-table')).hide();
                     getData();
                 } else {
@@ -1016,12 +1187,22 @@
                     if (result.errors) {
                         errorMessage += '\nValidation errors: ' + JSON.stringify(result.errors);
                     }
-                    alert(errorMessage);
+                    Swal.fire({
+                        title: 'Error',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred. Please try again. Error: ' + error.message);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again. Error: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             });
         });
     }

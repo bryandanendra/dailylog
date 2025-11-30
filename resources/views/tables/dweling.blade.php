@@ -308,7 +308,12 @@
         const description = document.getElementById('dweling-description').value;
 
         if (!title) {
-            alert('Dwelling name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Dweling name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('dwelingModal')).hide();
                 loadData();
-                alert(data.message || 'Dwelling saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Dweling saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving dweling');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving dweling',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving dweling');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving dweling',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete dweling
     function deleteDwelling(id) {
-        if (!confirm('Are you sure you want to delete this dweling?')) {
-            return;
-        }
-
-        fetch(`{{ url('/dweling') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/dweling') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Dweling deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting dweling',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting dweling',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Dwelling deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting dweling');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting dweling');
         });
     }
 

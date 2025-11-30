@@ -308,7 +308,12 @@
         const description = document.getElementById('division-description').value;
 
         if (!title) {
-            alert('Division name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Division name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('divisionModal')).hide();
                 loadData();
-                alert(data.message || 'Division saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Division saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving division');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving division',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving division');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving division',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete division
     function deleteDivision(id) {
-        if (!confirm('Are you sure you want to delete this division?')) {
-            return;
-        }
-
-        fetch(`{{ url('/division') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/division') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Division deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting division',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting division',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Division deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting division');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting division');
         });
     }
 

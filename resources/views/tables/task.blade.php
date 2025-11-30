@@ -308,7 +308,12 @@
         const description = document.getElementById('task-description').value;
 
         if (!title) {
-            alert('Task name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Task name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
                 loadData();
-                alert(data.message || 'Task saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Task saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving task');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving task',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving task');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving task',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete task
     function deleteTask(id) {
-        if (!confirm('Are you sure you want to delete this task?')) {
-            return;
-        }
-
-        fetch(`{{ url('/task') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/task') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Task deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting task',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting task',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Task deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting task');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting task');
         });
     }
 

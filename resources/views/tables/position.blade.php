@@ -308,7 +308,12 @@
         const description = document.getElementById('position-description').value;
 
         if (!title) {
-            alert('Position name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Position name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('positionModal')).hide();
                 loadData();
-                alert(data.message || 'Position saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Position saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving position');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving position',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving position');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving position',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete position
     function deletePosition(id) {
-        if (!confirm('Are you sure you want to delete this position?')) {
-            return;
-        }
-
-        fetch(`{{ url('/position') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/position') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Position deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting position',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting position',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Position deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting position');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting position');
         });
     }
 

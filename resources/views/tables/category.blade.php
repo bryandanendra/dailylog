@@ -308,7 +308,12 @@
         const description = document.getElementById('category-description').value;
 
         if (!title) {
-            alert('Category name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Category name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
                 loadData();
-                alert(data.message || 'Category saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Category saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving category');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving category',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving category');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving category',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete category
     function deleteCategory(id) {
-        if (!confirm('Are you sure you want to delete this category?')) {
-            return;
-        }
-
-        fetch(`{{ url('/category') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/category') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Category deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting category',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting category',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Category deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting category');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting category');
         });
     }
 

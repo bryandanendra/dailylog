@@ -190,13 +190,13 @@
         // Add event listeners
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', function() {
-                editWork Status(this.dataset.id, this.dataset.title, this.dataset.description);
+                editWtime(this.dataset.id, this.dataset.title, this.dataset.description);
             });
         });
 
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', function() {
-                deleteWork Status(this.dataset.id);
+                deleteWtime(this.dataset.id);
             });
         });
     }
@@ -293,7 +293,7 @@
     });
 
     // Edit wtime
-    function editWork Status(id, title, description) {
+    function editWtime(id, title, description) {
         document.getElementById('wtimeModalLabel').textContent = 'Edit Work Status';
         document.getElementById('wtime-id').value = id;
         document.getElementById('wtime-title').value = title;
@@ -308,7 +308,12 @@
         const description = document.getElementById('wtime-description').value;
 
         if (!title) {
-            alert('Work Status name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Work Status name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('wtimeModal')).hide();
                 loadData();
-                alert(data.message || 'Work Status saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Work Status saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving wtime');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving wtime',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving wtime');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving wtime',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete wtime
-    function deleteWork Status(id) {
-        if (!confirm('Are you sure you want to delete this wtime?')) {
-            return;
-        }
-
-        fetch(`{{ url('/wtime') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+    function deleteWtime(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/wtime') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Work Status deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting wtime',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting wtime',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Work Status deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting wtime');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting wtime');
         });
     }
 

@@ -321,12 +321,22 @@
         const description = document.getElementById('subdivision-description').value;
 
         if (!divisionId) {
-            alert('Division is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Division is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
         if (!title) {
-            alert('Sub Division name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Sub Division name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -346,41 +356,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('subdivisionModal')).hide();
                 loadData();
-                alert(data.message || 'Sub Division saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Sub Division saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving subdivision');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving subdivision',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving subdivision');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving subdivision',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete subdivision
     function deleteSubdivision(id) {
-        if (!confirm('Are you sure you want to delete this subdivision?')) {
-            return;
-        }
-
-        fetch(`{{ url('/subdivision') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/subdivision') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Sub Division deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting subdivision',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting subdivision',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Sub Division deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting subdivision');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting subdivision');
         });
     }
 

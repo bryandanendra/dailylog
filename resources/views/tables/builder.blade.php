@@ -308,7 +308,12 @@
         const description = document.getElementById('builder-description').value;
 
         if (!title) {
-            alert('Builder name is required');
+            Swal.fire({
+                title: 'Error',
+                text: 'Builder name is required',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
             return;
         }
 
@@ -328,41 +333,79 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('builderModal')).hide();
                 loadData();
-                alert(data.message || 'Builder saved successfully');
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message || 'Builder saved successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                });
             } else {
-                alert(data.message || 'Error saving builder');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Error saving builder',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving builder');
+            Swal.fire({
+                title: 'Error',
+                text: 'Error saving builder',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 
     // Delete builder
     function deleteBuilder(id) {
-        if (!confirm('Are you sure you want to delete this builder?')) {
-            return;
-        }
-
-        fetch(`{{ url('/builder') }}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#0d6efd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`{{ url('/builder') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadData();
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'Builder deleted successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Error deleting builder',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error deleting builder',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-                alert(data.message || 'Builder deleted successfully');
-            } else {
-                alert(data.message || 'Error deleting builder');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting builder');
         });
     }
 
