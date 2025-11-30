@@ -410,15 +410,20 @@
     };
 
     const removeRow = (id) => {
+        console.log('Attempting to remove employee with ID:', id); // Debug ID
         if(confirm('Are you sure? this data will be remove')) {
             fetch(`/employee/remove?id=${id}`)
             .then(response => {
+                console.log('Response status:', response.status); // Debug Status
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.text().then(text => {
+                        throw new Error(`Server responded with ${response.status}: ${text}`);
+                    });
                 }
                 return response.json();
             })
             .then((data) => {
+                console.log('Response data:', data); // Debug Data
                 if (data.success) {
                     alert(data.message || 'Data has been removed');
                     getData();
@@ -427,8 +432,8 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while deleting');
+                console.error('Error details:', error);
+                alert('An error occurred: ' + error.message);
             });
         }
     };

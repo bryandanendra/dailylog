@@ -341,9 +341,20 @@ class EmployeeController extends Controller
             } else {
                 // Archive the employee
                 $employee->update(['archive' => true]);
+                
+                // Also archive the linked user if exists
+                if ($employee->user_id) {
+                    $user = \App\Models\User::find($employee->user_id);
+                    if ($user) {
+                        $user->update(['archive' => true]);
+                    }
+                }
+                
                 return response()->json(['success' => true, 'message' => 'Employee archived successfully']);
             }
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Employee Delete Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
             return response()->json(['success' => false, 'message' => 'Server Error: ' . $e->getMessage()]);
         }
     }

@@ -247,11 +247,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/employee', [App\Http\Controllers\EmployeeController::class, 'index'])->name('employee.index');
     Route::get('/employee/getData', [App\Http\Controllers\EmployeeController::class, 'getData'])->name('employee.getdata');
     Route::get('/employee/getCombo', [App\Http\Controllers\EmployeeController::class, 'getCombo'])->name('employee.getcombo');
+    Route::get('/employee/remove', [App\Http\Controllers\EmployeeController::class, 'destroy'])->name('employee.remove'); // Moved up
+    Route::get('/employee/resetpass', [App\Http\Controllers\EmployeeController::class, 'resetPassword'])->name('employee.resetpass'); // Moved up
     Route::get('/employee/{id}', [App\Http\Controllers\EmployeeController::class, 'show'])->name('employee.show');
     Route::post('/employee', [App\Http\Controllers\EmployeeController::class, 'store'])->name('employee.store');
     Route::put('/employee/{id}', [App\Http\Controllers\EmployeeController::class, 'update'])->name('employee.update');
-    Route::get('/employee/remove', [App\Http\Controllers\EmployeeController::class, 'destroy'])->name('employee.remove');
-    Route::get('/employee/resetpass', [App\Http\Controllers\EmployeeController::class, 'resetPassword'])->name('employee.resetpass');
     
     // Employee Registration Approval Routes
     Route::post('/employee/approve', [App\Http\Controllers\EmployeeController::class, 'approveRegistration'])->name('employee.approve');

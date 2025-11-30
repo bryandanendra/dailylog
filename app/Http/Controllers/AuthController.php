@@ -21,13 +21,16 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Ensure user is not archived
+        $credentials['archive'] = 0;
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->intended('/');
         }
 
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
+            'username' => 'The provided credentials do not match our records or account is inactive.',
         ])->onlyInput('username');
     }
 
