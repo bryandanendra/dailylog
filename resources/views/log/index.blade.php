@@ -844,7 +844,7 @@ function startAutoRefresh() {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
     }
-    autoRefreshInterval = setInterval(checkApprovalStatus, 10000); // Check every 10 seconds
+    autoRefreshInterval = setInterval(checkApprovalStatus, 60000); // Check every 1 minute (reduced from 10s to reduce server load)
 }
 
 // Stop auto-refresh

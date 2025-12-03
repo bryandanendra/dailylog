@@ -252,7 +252,7 @@ document.getElementById('mark-all-read').addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     loadNotifications();
     
-    // Reload notifications every 30 seconds
-    setInterval(loadNotifications, 30000);
+    // Reload notifications every 2 minutes (reduced from 30s to reduce server load)
+    setInterval(loadNotifications, 120000);
 });
 </script>
