@@ -332,24 +332,16 @@
                             <span class="nav-text">BI Report</span>
                         </a>
                         @endif
-                        @if(hasReportAccess('spdr'))
-                        <a class="nav-link" href="{{ route('report.spdr') }}">
-                            <i class="bi bi-circle-fill"></i>
-                            <span class="nav-text">SPDR Report</span>
-                        </a>
-                        @endif
                         @if(hasReportAccess('category'))
                         <a class="nav-link" href="{{ route('report.category') }}">
                             <i class="bi bi-circle-fill"></i>
                             <span class="nav-text">Category Report</span>
                         </a>
                         @endif
-                        @if(hasReportAccess('tma'))
-                        <a class="nav-link" href="{{ route('report.tma') }}">
+                        <a class="nav-link {{ request()->is('report/division*') ? 'active' : '' }}" href="{{ route('report.division') }}">
                             <i class="bi bi-circle-fill"></i>
-                            <span class="nav-text">TMA Report</span>
+                            <span class="nav-text">Division Report</span>
                         </a>
-                        @endif
                     </div>
                 </div>
             </div>

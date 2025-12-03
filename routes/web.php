@@ -98,6 +98,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tma/getHoliday', [App\Http\Controllers\TMAReportController::class, 'getHoliday'])->name('report.tma.getholiday');
         Route::get('/tma/print', [App\Http\Controllers\TMAReportController::class, 'print'])->name('report.tma.print');
         
+        // Division Report (Auto-detect user's division)
+        Route::get('/division', [App\Http\Controllers\DivisionReportController::class, 'index'])->name('report.division');
+        Route::get('/division/getData', [App\Http\Controllers\DivisionReportController::class, 'getData'])->name('report.division.getdata');
+        Route::get('/division/getHoliday', [App\Http\Controllers\DivisionReportController::class, 'getHoliday'])->name('report.division.getholiday');
+        Route::get('/division/print', [App\Http\Controllers\DivisionReportController::class, 'print'])->name('report.division.print');
+        
     });
     
     // Approval Routes

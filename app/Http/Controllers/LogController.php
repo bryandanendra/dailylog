@@ -44,11 +44,11 @@ class LogController extends Controller
             'subject' => 'required|string|max:255',
             'description' => 'nullable|string',
             'qty' => 'required|integer|min:0',
-            'category' => 'nullable|string',
-            'task' => 'nullable|string',
-            'builder' => 'nullable|string',
-            'dweling' => 'nullable|string',
-            'status' => 'nullable|string',
+            'category' => 'required|string', // Changed to required
+            'task' => 'required|string', // Changed to required
+            'builder' => 'required|string', // Changed to required
+            'dweling' => 'required|string', // Changed to required
+            'status' => 'required|string', // Changed to required
             'duration' => 'required|numeric|min:0',
             'note' => 'nullable|string',
             'temp' => 'boolean',
@@ -57,35 +57,44 @@ class LogController extends Controller
         $user = Auth::user();
         $employee = Employee::where('email', $user->email)->first();
         
-        // Find or create master data by title
-        $category = null;
-        $task = null;
-        $builder = null;
-        $dweling = null;
-        $status = null;
+        // Find master data by title
+        $category = Category::where('title', $request->category)->first();
+        $task = Task::where('title', $request->task)->first();
+        $builder = Builder::where('title', $request->builder)->first();
+        $dweling = Dweling::where('title', $request->dweling)->first();
+        $status = Status::where('title', $request->status)->first();
         
-        if (!empty($request->category)) {
-            $category = Category::where('title', $request->category)->first();
+        // Return error if any required field not found
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found. Please select a valid category.'
+            ], 400);
         }
-        if (!empty($request->task)) {
-            $task = Task::where('title', $request->task)->first();
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task not found. Please select a valid task.'
+            ], 400);
         }
-        if (!empty($request->builder)) {
-            $builder = Builder::where('title', $request->builder)->first();
+        if (!$builder) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Builder not found. Please select a valid builder.'
+            ], 400);
         }
-        if (!empty($request->dweling)) {
-            $dweling = Dweling::where('title', $request->dweling)->first();
+        if (!$dweling) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dwelling not found. Please select a valid dwelling.'
+            ], 400);
         }
-        if (!empty($request->status)) {
-            $status = Status::where('title', $request->status)->first();
+        if (!$status) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Status not found. Please select a valid status.'
+            ], 400);
         }
-        
-        // If not found, use first available
-        if (!$category) $category = Category::first();
-        if (!$task) $task = Task::first();
-        if (!$builder) $builder = Builder::first();
-        if (!$dweling) $dweling = Dweling::first();
-        if (!$status) $status = Status::first();
         
         $log = Log::create([
             'date' => $request->date,
@@ -124,45 +133,54 @@ class LogController extends Controller
             'subject' => 'required|string|max:255',
             'description' => 'nullable|string',
             'qty' => 'required|integer|min:0',
-            'category' => 'nullable|string',
-            'task' => 'nullable|string',
-            'builder' => 'nullable|string',
-            'dweling' => 'nullable|string',
-            'status' => 'nullable|string',
+            'category' => 'required|string', // Changed to required
+            'task' => 'required|string', // Changed to required
+            'builder' => 'required|string', // Changed to required
+            'dweling' => 'required|string', // Changed to required
+            'status' => 'required|string', // Changed to required
             'duration' => 'required|numeric|min:0',
             'note' => 'nullable|string',
             'temp' => 'boolean',
         ]);
         
-        // Find or create master data by title
-        $category = null;
-        $task = null;
-        $builder = null;
-        $dweling = null;
-        $status = null;
+        // Find master data by title
+        $category = Category::where('title', $request->category)->first();
+        $task = Task::where('title', $request->task)->first();
+        $builder = Builder::where('title', $request->builder)->first();
+        $dweling = Dweling::where('title', $request->dweling)->first();
+        $status = Status::where('title', $request->status)->first();
         
-        if (!empty($request->category)) {
-            $category = Category::where('title', $request->category)->first();
+        // Return error if any required field not found
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found. Please select a valid category.'
+            ], 400);
         }
-        if (!empty($request->task)) {
-            $task = Task::where('title', $request->task)->first();
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task not found. Please select a valid task.'
+            ], 400);
         }
-        if (!empty($request->builder)) {
-            $builder = Builder::where('title', $request->builder)->first();
+        if (!$builder) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Builder not found. Please select a valid builder.'
+            ], 400);
         }
-        if (!empty($request->dweling)) {
-            $dweling = Dweling::where('title', $request->dweling)->first();
+        if (!$dweling) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dwelling not found. Please select a valid dwelling.'
+            ], 400);
         }
-        if (!empty($request->status)) {
-            $status = Status::where('title', $request->status)->first();
+        if (!$status) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Status not found. Please select a valid status.'
+            ], 400);
         }
-        
-        // If not found, use first available
-        if (!$category) $category = Category::first();
-        if (!$task) $task = Task::first();
-        if (!$builder) $builder = Builder::first();
-        if (!$dweling) $dweling = Dweling::first();
-        if (!$status) $status = Status::first();
         
         $log->update([
             'subject' => $request->subject,

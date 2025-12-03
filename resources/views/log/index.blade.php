@@ -199,33 +199,43 @@ function removeRow(button) {
     if (rowId.startsWith('new-')) {
         // New row, just remove from DOM
         row.remove();
+        updateRowNumbers();
     } else {
         // Existing row, delete from database
-        if (confirm('Are you sure you want to delete this log entry?')) {
-            fetch(`/log/${rowId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    row.remove();
-                    updateRowNumbers();
-                    updateTotalDuration();
-                } else {
-                    alert('Error deleting log: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deleting log');
+        fetch(`/log/${rowId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                row.remove();
+                updateRowNumbers();
+                updateTotalDuration();
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error deleting log: ' + data.message,
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Error deleting log',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
             });
-        }
+        });
     }
 }
+
 
 // Update Row Numbers
 function updateRowNumbers() {
@@ -511,6 +521,10 @@ function updateTableWithData(logs) {
     const tbody = document.getElementById('logsTableBody');
     tbody.innerHTML = '';
     
+    const selectedDate = document.getElementById('chaDate').value;
+    const today = new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === today;
+    
     if (logs.length === 0) {
         tbody.innerHTML = '<tr id="no-data"><td colspan="14" class="text-center text-muted py-4">No logs found for selected date. Click "Add Row" to create a new log entry.</td></tr>';
         rowCounter = 0;
@@ -524,20 +538,36 @@ function updateTableWithData(logs) {
             row.setAttribute('appicon', log.approved_emoji ? '1' : '0');
             row.style.color = '#0d6efd';
             
+            // Determine if log can be edited:
+            // 1. Must be today's date
+            // 2. Must NOT be approved
+            const canEdit = isToday && !log.approved;
+            const isApproved = log.approved;
+            
             row.innerHTML = `
-                <td class="text-center"><button class="btns btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="bi bi-x-square"></i> Remove</button></td>
+                <td class="text-center">
+                    ${isApproved ? 
+                        '<button class="btns btn btn-sm btn-outline-success" disabled="true" style="pointer-events: none;"><i class="bi bi-check-lg"></i> Approved</button>' 
+                        : 
+                        (canEdit ? 
+                            '<button class="btns btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="bi bi-x-square"></i> Remove</button>' 
+                            : 
+                            '<button class="btns btn btn-sm btn-outline-secondary" disabled="true" style="pointer-events: none;"><i class="bi bi-lock"></i> Read Only</button>'
+                        )
+                    }
+                </td>
                 <td class="text-end">${index + 1}</td>
-                <td><div contenteditable="true" style="pointer-events: auto; background-color: transparent;" class="log" field="subject" placeholder="Subject" data="${log.subject}" spellcheck="false">${log.subject}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto" class="log" field="description" placeholder="Description" data="${log.description}" spellcheck="false">${log.description}</div></td>
-                <td class="text-end"><div contenteditable="true" style="pointer-events: auto" class="log" field="qty" placeholder="Qty" data="${log.qty}" spellcheck="false">${log.qty}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto; background-color: transparent;" class="category" field="category" placeholder="Category" data="${log.category ? log.category.title : ''}" spellcheck="false">${log.category ? log.category.title : ''}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto; background-color: transparent;" class="task" field="task" placeholder="Task" data="${log.task ? log.task.title : ''}" spellcheck="false">${log.task ? log.task.title : ''}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto" class="builder" field="builder" placeholder="Builder" data="${log.builder ? log.builder.title : ''}" spellcheck="false">${log.builder ? log.builder.title : ''}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto" class="dweling" field="dweling" placeholder="Dwelling" data="${log.dweling ? log.dweling.title : ''}" spellcheck="false">${log.dweling ? log.dweling.title : ''}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto; background-color: transparent;" class="status" field="status" placeholder="Status" data="${log.status ? log.status.title : ''}" spellcheck="false">${log.status ? log.status.title : ''}</div></td>
-                <td class="text-end"><div contenteditable="true" style="pointer-events: auto; background-color: transparent;" class="log" field="duration" placeholder="Duration" min="0" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" data="${log.duration}" spellcheck="false">${log.duration}</div></td>
-                <td><div contenteditable="true" style="pointer-events: auto" class="log" field="note" placeholder="Additional Notes" data="${log.note || ''}" spellcheck="false">${log.note || ''}</div></td>
-                <td class="text-center"><input type="checkbox" trid="${log.id}" class="fwtime" style="width: 24px; height: 24px; cursor: pointer;" onclick="fwtime(this)" ${log.temp ? 'checked' : ''}></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="log" field="subject" placeholder="Subject" data="${log.subject}" spellcheck="false">${log.subject}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="log" field="description" placeholder="Description" data="${log.description}" spellcheck="false">${log.description}</div></td>
+                <td class="text-end"><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="log" field="qty" placeholder="Qty" data="${log.qty}" spellcheck="false">${log.qty}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="category" field="category" placeholder="Category" data="${log.category ? log.category.title : ''}" spellcheck="false">${log.category ? log.category.title : ''}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="task" field="task" placeholder="Task" data="${log.task ? log.task.title : ''}" spellcheck="false">${log.task ? log.task.title : ''}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="builder" field="builder" placeholder="Builder" data="${log.builder ? log.builder.title : ''}" spellcheck="false">${log.builder ? log.builder.title : ''}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="dweling" field="dweling" placeholder="Dwelling" data="${log.dweling ? log.dweling.title : ''}" spellcheck="false">${log.dweling ? log.dweling.title : ''}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="status" field="status" placeholder="Status" data="${log.status ? log.status.title : ''}" spellcheck="false">${log.status ? log.status.title : ''}</div></td>
+                <td class="text-end"><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="log" field="duration" placeholder="Duration" min="0" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" data="${log.duration}" spellcheck="false">${log.duration}</div></td>
+                <td><div contenteditable="${canEdit}" style="pointer-events: ${canEdit ? 'auto' : 'none'}; background-color: ${canEdit ? 'transparent' : '#f8f9fa'};" class="log" field="note" placeholder="Additional Notes" data="${log.note || ''}" spellcheck="false">${log.note || ''}</div></td>
+                <td class="text-center"><input type="checkbox" trid="${log.id}" class="fwtime" style="width: 24px; height: 24px; cursor: ${canEdit ? 'pointer' : 'not-allowed'};" onclick="fwtime(this)" ${log.temp ? 'checked' : ''} ${canEdit ? '' : 'disabled'}></td>
                 <td class="cell-add" data-bs-toggle="modal" data-bs-target="#replynoted1" hidden=""><div placeholder="Approved Note">${log.approved_note || ''}</div></td>
                 <td class="cell-add text-center" hidden=""><div placeholder="Emoji">${log.approved_emoji || ''}</div></td>
             `;
@@ -552,7 +582,36 @@ function updateTableWithData(logs) {
     setTimeout(() => {
         setupAutocomplete();
     }, 100);
+    
+    // Hide Add Row and Submit buttons if not today
+    const btnAddRow = document.getElementById('btn-addRow');
+    const btnSaveRow = document.getElementById('btn-saveRow');
+    const expiredDiv = document.querySelector('.expired');
+    
+    if (!isToday) {
+        btnAddRow.disabled = true;
+        btnAddRow.style.opacity = '0.5';
+        btnAddRow.style.cursor = 'not-allowed';
+        btnSaveRow.disabled = true;
+        btnSaveRow.style.opacity = '0.5';
+        btnSaveRow.style.cursor = 'not-allowed';
+        if (expiredDiv) {
+            expiredDiv.classList.remove('d-none');
+            expiredDiv.textContent = 'This is a past date. Logs cannot be edited or added.';
+        }
+    } else {
+        btnAddRow.disabled = false;
+        btnAddRow.style.opacity = '1';
+        btnAddRow.style.cursor = 'pointer';
+        btnSaveRow.disabled = false;
+        btnSaveRow.style.opacity = '1';
+        btnSaveRow.style.cursor = 'pointer';
+        if (expiredDiv) {
+            expiredDiv.classList.add('d-none');
+        }
+    }
 }
+
 
 // Submit Function
 document.getElementById('btn-saveRow').addEventListener('click', function() {
@@ -602,7 +661,12 @@ document.getElementById('btn-saveRow').addEventListener('click', function() {
     console.log('Logs to save:', logsToSave);
     
     if (logsToSave.length === 0) {
-        alert('Please fill in at least Subject for one or more logs.');
+        Swal.fire({
+            title: 'Validation Error',
+            text: 'Please fill in at least the Subject field for one or more logs.',
+            icon: 'warning',
+            confirmButtonColor: '#0d6efd'
+        });
         return;
     }
     
@@ -657,11 +721,15 @@ document.getElementById('btn-saveRow').addEventListener('click', function() {
         // Show result
         console.log('Final results:', { savedCount, errorCount });
         if (errorCount === 0) {
-            alert(`All ${savedCount} logs saved successfully!`);
             // Reload the page to show updated data
             location.reload();
         } else {
-            alert(`${savedCount} logs saved, ${errorCount} errors occurred.`);
+            Swal.fire({
+                title: 'Partial Save',
+                text: `${savedCount} logs saved, ${errorCount} errors occurred.`,
+                icon: 'warning',
+                confirmButtonColor: '#0d6efd'
+            });
         }
     };
     
@@ -818,9 +886,7 @@ document.getElementById('btn-reload').addEventListener('click', function() {
 
 // Reset Column Widths Function
 document.getElementById('btn-reset-columns').addEventListener('click', function() {
-    if (confirm('Reset all column widths to default? This will reload the page.')) {
-        resetColumnWidths();
-    }
+    resetColumnWidths();
 });
 
 // Column Resizing Functionality
