@@ -625,7 +625,8 @@ function createCategoryChart(categoryStats) {
     data.addColumn({type: 'string', role: 'annotation'});
     
     Object.values(categoryStats).forEach(stat => {
-        const hours = parseFloat(stat.total_hours);
+        const minutes = parseFloat(stat.total_hours);
+        const hours = minutes / 60; // Convert minutes to hours
         data.addRow([stat.name, hours, hours.toFixed(2)]);
     });
     
@@ -705,8 +706,11 @@ function createTaskChart(taskStats) {
         .slice(0, 8);
     
     sortedStats.forEach(stat => {
-        data.addRow([stat.name, parseFloat(stat.total_hours)]);
+        const minutes = parseFloat(stat.total_hours);
+        const hours = minutes / 60; // Convert minutes to hours
+        data.addRow([stat.name, hours]);
     });
+
     
     const options = {
         title: 'Task Hours Percentage Chart',
@@ -759,7 +763,8 @@ function createDwellingChart(dwellingStats) {
     data.addColumn({type: 'string', role: 'annotation'});
     
     Object.values(dwellingStats).forEach(stat => {
-        const hours = parseFloat(stat.total_hours);
+        const minutes = parseFloat(stat.total_hours);
+        const hours = minutes / 60; // Convert minutes to hours
         data.addRow([stat.name, hours, hours.toFixed(2)]);
     });
     
