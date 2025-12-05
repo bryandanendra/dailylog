@@ -3,3 +3,15 @@
 
 # Playwright screenshots and test files
 .playwright-mcp/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+
+# Linux system files
+*~
